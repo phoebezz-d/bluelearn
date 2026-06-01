@@ -39,17 +39,15 @@
 ## 📚 What is BlueLearn
 
 Most "free" knowledge online is organized for **retrieval**, not for **learning**.
-You can look up what a Fourier transform is on Wikipedia in 30 seconds —
-actually learning it from scratch takes weeks of unfunded scaffolding
-because nothing tells you what to read first.
+You can look up what a Fourier transform is on Wikipedia in 30 seconds. 
+Actually learning it without a class? That's a week of figuring out what to read first.
 
 BlueLearn is **a graph of concepts** where every page declares its
 prerequisites. Hit a term you don't know? The prerequisite is one click
 away. Community-written, optionally expert-verified, AGPL-3.0, free forever.
 
 This repository is the **product monorepo**: web client, API, and database.
-The marketing site lives separately in
-[`bluelearn-org/marketing`](https://github.com/bluelearn-org/marketing).
+The marketing site is closed-source.
 
 **💬 [Join the Discord →](https://discord.gg/bluesystem)** · **🌐 [bluelearn.org →](https://bluelearn.org)** · **📺 [YouTube →](https://www.youtube.com/@blue-learn)**
 
