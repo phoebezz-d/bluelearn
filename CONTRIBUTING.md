@@ -1,7 +1,6 @@
 # Contributing to BlueLearn
 
-Thanks for being here. BlueLearn is a small, open project — your first PR
-can land within a day on a good week. This document is the whole
+Thanks for being here. This document is the whole
 contributor path, from "I want to help" to "my change is merged."
 
 > If you only read one thing: open an issue or ping `#contributing` on
