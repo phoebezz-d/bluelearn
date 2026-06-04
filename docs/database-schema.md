@@ -219,6 +219,7 @@ An odd-numbered random group of panelists assembled to decide a case, drawn from
 
 - `id`: primary key of the panel.
 - `case_id`: the case this panel decides (FK to `review_cases`). One case may have many panels.
+- `target_seat_count`: how many seats this panel should fill (odd integer). Set when the panel is assembled by reading the size policy for the case type (a default per `case_type`, then clamped to the eligible pool and rounded to odd. See [Deciding panel size](#deciding-panel-size)).
 - `outcome`: the panel's majority decision: `approved` | `rejected`. Null until the panel closes. Both `review_cases` and `review_panels` require a status/outcome column because a review case can have multiple panels in its lifetime.
 - `opened_at`: when the panel was assembled.
 - `closed_at`: when the panel reached its outcome; null while open.
@@ -307,7 +308,11 @@ Contests the outcome of a prior `review_case`.
 
 ---
 
-## Slugs and URLs
+## Considerations
+
+Design decisions and rules that span multiple tables.
+
+### Slugs and URLs
 
 Slugs live in two layers, one stable identifier each:
 
@@ -325,7 +330,7 @@ How a guide slug is decided:
 2. Resolve collisions against siblings under the **same base only** by appending a counter (`visual-method`, `visual-method-2`). This is a last resort, as it will only be used if the author decides to not change the guide's title to be unique. On guide submission, there will be a warning signaling the author that there is another guide with the same name, and they should change it unless they are okay with the numbered slug being used. Per-base scoping means a slug like `visual-method` can be reused under a different topic.
 3. Assign at **first publish**, once the title has settled through review; drafts are addressed by id until then. After that the slug is frozen, and later title edits never move it.
 
-## Snapshots vs. Deltas
+### Snapshots vs. Deltas
 
 So, guide revisions can basically be implemented in two ways: via whole snapshots (faster but take up slightly more storage, which may or may not be a problem because markdown/text is so tiny anyway; note: images will not be duplicated between revisions) or deltas/diffs (take up less storage but are slower and more complex). 
 
@@ -358,7 +363,7 @@ If deltas were stored instead, a delta model would store only the change/patch f
 
 Because the use case is read-heavy (history, diff, rollback) and guide bodies are small markdown with media kept in object storage, **full snapshots are most likely the right option**. 
 
-## Related Edges in Practice
+### Related Edges in Practice
 
 `guide_edges` is physically directed (`from_guide_base_id -> to_guide_base_id`), and for `prerequisite` rows that direction carries meaning (learning order). A `related` edge is **semantically undirected**: "Vectors related to Matrices" is the same fact as the reverse. The `from`/`to` columns therefore carry no meaning for `related` rows; they are just the two endpoints. `related` and `prerequisite` edges are kept on the same table rather than split into separate tables because they represent a single unified graph structure with differing semantics rather than fundamentally different data models while allowing potential future edge types to be easily added to the table.
 
@@ -391,39 +396,45 @@ For the reverse-direction lookups to stay fast, `to_guide_base_id` needs its own
 CREATE INDEX guide_edges_to_guide_base_id ON guide_edges (to_guide_base_id);
 ```
 
-## Derived Data
+### Deciding panel size
+
+`review_panels.target_seat_count` is decided at assembly time, in three steps:
+
+1. **Policy default per `case_type`.** A baseline count, e.g. `guide_publish`/`guide_edit` → 3 verifiers, `dispute`/`appeal`/`re_review` → 5 moderators (numbers illustrative). Higher-stakes governance gets a larger panel. This is a small static map (one odd number per `case_type`) that changes only on a policy decision, so it lives as an app-level constant, not a table. The value is read here and copied onto the panel, which freezes it.
+2. **Clamp to the eligible pool.** The eligible pool is the role pool that matches the case type (verifiers vs moderators) minus anyone recused, conflicted, suspended (`profiles.is_suspended`), or the case author. You cannot seat more panelists than exist: `target = min(policy_default, eligible_pool_size)`.
+3. **Round down to odd.** A majority must always be decidable, so an even clamp is reduced by one (`4 → 3`). A pool too small to seat the minimum (e.g. fewer than 3 eligible) blocks assembly rather than seating an even or trivially small panel.
+
+```text
+target_seat_count = round_down_to_odd( min( policy_default(case_type), eligible_pool_size ) )
+```
+
+The same eligibility filter feeds the replacement flow: when a seat is `replaced`, the new panelist is drawn from this pool minus those already seated.
+
+### Derived Data
 
 These are computed from prerequisite edges and optional subject filters.
 
-### Levels
+#### Levels
 
-A level is computed inside a walkthrough. The level of a guide base is its longest prerequisite path from a primitive within that walkthrough.
+A level is computed inside a walkthrough. The level of a guide base is its longest prerequisite path from a primitive within that walkthrough. The same guide base can have different levels in different walkthroughs, so storing a global level would be wrong.
 
-The same guide base can have different levels in different walkthroughs, so storing a global level would be wrong.
+#### Frontiers
 
-### Frontiers
+A frontier is a guide base with no dependents inside a subject-filtered graph. The same guide base can be a frontier in one subject and a prerequisite in another, so frontier status is derived per subject view.
 
-A frontier is a guide base with no dependents inside a subject-filtered graph.
+#### Reachability
 
-The same guide base can be a frontier in one subject and a prerequisite in another, so frontier status is derived per subject view.
+Reachability is computed by checking whether every transitive prerequisite exists and whether TODO prerequisites remain unresolved. Storing `reachable` would risk drift whenever an edge, guide base, or TODO prerequisite changes.
 
-### Reachability
+#### Walkthroughs
 
-Reachability is computed by checking whether every transitive prerequisite exists and whether TODO prerequisites remain unresolved.
+Most walkthroughs should be generated on demand by picking a target guide base and computing its transitive prerequisite DAG. Saved or user-curated walkthroughs are intentionally left for a later migration because their sharing, attribution, and dispute model is still open in `docs/open-questions.md`.
 
-Storing `reachable` would risk drift whenever an edge, guide base, or TODO prerequisite changes.
-
-### Walkthroughs
-
-Most walkthroughs should be generated on demand by picking a target guide base and computing its transitive prerequisite DAG.
-
-Saved or user-curated walkthroughs are intentionally left for a later migration because their sharing, attribution, and dispute model is still open in `docs/open-questions.md`.
-
-## Not Yet Implemented
+### Not Yet Implemented
 
 These are required by `overall-system.md` but intentionally deferred. They are listed here so the gaps are explicit rather than forgotten. None block the first-pass schema.
 
-### Subject prerequisite floor
+#### Subject prerequisite floor
 
 `overall-system.md` lets a subject declare a **prerequisite floor** (e.g. "physics floor = arithmetic + algebra") that applies to its tagged subgraph, keeping subject views from spiralling into low-level dependencies. Floors are assumed readable, but no table stores them yet.
 
@@ -439,19 +450,19 @@ subject_prerequisite_floors (
 
 Each row says "this guide base is part of subject S's floor." Walkthrough generation scoped to S can then stop descending past floor guide bases instead of chasing every transitive prerequisite. Writes are governance-only (see the `admin` role).
 
-### Section pointer on votes and re-review
+#### Section pointer on votes and re-review
 
 `overall-system.md` lets a downvote optionally carry a **section pointer** (which header of the guide the flag targets), and the **section-density re-review path** fires when a single section accumulates enough flags. The current `votes` table has no section field, so neither the per-section moderator breakdown nor the section-density trigger can be built yet.
 
 Planned shape: a nullable `section_ref` on `votes` holding the header anchor/slug. Sections are parsed from the markdown body at display time, so no separate section table is needed; a null `section_ref` is a whole-guide flag. `re_review_cases` gains a matching nullable `section_ref`, set only when `trigger_type = 'section_density'`, to scope the lighter section-level review.
 
-### Standing / reputation
+#### Standing / reputation
 
 `overall-system.md` standing-gates dispute filing "to prevent spam," and degrades a reviewer's standing when their decisions are overturned ("persistent patterns remove the verifier role"). Nothing in the schema currently exposes a member's standing.
 
 Open question: **derive** it on demand from existing ground truth (contribution history, `review_decisions`, and `appeals` outcomes) or **store** a maintained `standing`/reputation column on `profiles`. Derivation avoids drift but must be cheap enough to evaluate at dispute-file time and panel-draw time; a stored column is faster to gate on but needs its own update path. Resolve before the dispute system ships.
 
-### Role applications
+#### Role applications
 
 For now, `verifier`/`moderator`/`admin` roles are granted directly by an admin inserting a `user_roles` row. A self-service flow where users **apply** for a role and an admin (later, automated credentialing) reviews the request is deferred.
 
@@ -466,3 +477,95 @@ Potential shape: a `role_applications` table.
 - `created_at`: when the application was filed.
 
 Approval inserts the matching `user_roles` row. A partial unique index on `(user_id, role) WHERE status = 'pending'` stops a user stacking duplicate open applications for the same role.
+
+---
+
+## Table Flows in Practice
+
+This section traces the main user actions end to end, showing which rows are written, in which tables, and in what order. It exists to check the schema against real usage. Each flow lists the steps as `table` → what is written.
+
+### 1. Create a new topic and publish its first guide
+
+A user starts a brand-new topic from scratch.
+
+1. `guide_bases` → insert the node: `title`, `slug`, `knowledge_type`, `status = 'draft'`, `canonical_guide_id = NULL`. No content yet.
+2. `guides` → insert the first guide under it: `guide_base_id`, `author_id`, `status = 'draft'`, `current_revision_id = NULL`, `slug = NULL` (addressed by id until first publish).
+3. `guide_revisions` → insert revision 1 while the author writes: `guide_id`, `revision_number = 1`, `title`, `summary`, `body`, `author_id`, `status = 'draft'`.
+
+The author edits freely; each save can overwrite the draft revision (drafts are mutable up to submission; published revisions are immutable).
+
+1. **Submit for review** (one transaction):
+  - `guide_revisions` → set the revision `status = 'submitted'`.
+  - `review_cases` → insert root: `case_type = 'guide_publish'`, `status = 'pending'`, `created_by = author`.
+  - `guide_review_cases` → insert satellite: `case_id`, `guide_revision_id` (pins the exact snapshot).
+2. **Panel assembled** (verifier pool, odd count):
+  - Decide the size: `target = round_to_odd(min(policy_default(case_type), eligible_pool_size))`, where the eligible pool is the right role pool (verifiers here) minus anyone recused, conflicted, suspended, or the author. See [Deciding panel size](#deciding-panel-size).
+  - `review_panels` → insert: `case_id`, `target_seat_count` = that value (frozen here), `outcome = NULL`, `opened_at`.
+  - `panel_members` → insert one row per seat up to `target_seat_count`: `panel_id`, `member_id`, `status = 'assigned'`, `assigned_at`. `review_cases.status` → `in_review`.
+3. **Each verifier votes**:
+  - `review_decisions` → insert: `panel_member_id`, `decision`, `notes`. Seat `panel_members.status` → `completed`.
+  - On a `rejected` decision: `review_decision_reasons` → one or more rubric rows for that decision.
+  - Seats that miss `review_cases.time_limit`: `panel_members.status` → `replaced`, and a fresh `panel_members` row is drawn (history preserved).
+4. **Panel closes on majority**:
+  - `review_panels` → set `outcome`, `closed_at`. `review_cases.status` → `approved` or `rejected`.
+5. **On approval** (publish, one transaction):
+  - `guides` → set `current_revision_id` = the approved revision, `status = 'published'`, `slug = slugify(title)` (frozen from here; collisions resolved against siblings under the same base).
+  - `guide_bases` → set `status = 'published'`, and `canonical_guide_id` = this guide (first published guide is canonical by default).
+
+On rejection nothing publishes; the revision stays as a rejected snapshot (status derived from the case), and the author can revise and resubmit, which creates a new revision and a new case.
+
+### 2. Add a method / alternative to an existing topic
+
+A second author adds another guide under a topic that already has a canonical guide.
+
+1. `guides` → insert a new guide: same `guide_base_id`, new `author_id`, `status = 'draft'`.
+2. `guide_revisions` → revision 1 of the new guide.
+3. Submit → review → publish: identical to flow 1 steps 4–8, **except** `guide_bases.canonical_guide_id` is **not** touched. The new guide publishes as a sibling; whether it becomes canonical is decided later by votes (flow 4), not by publishing.
+
+### 3. Edit an existing published guide
+
+1. `guide_revisions` → insert the next revision: `revision_number = N+1`, edited `title`/`summary`/`body`, `change_summary`, `author_id` (may differ from original author → spreads edit credit), `status = 'draft'` then `submitted` on handoff.
+2. `review_cases` → `case_type = 'guide_edit'`; `guide_review_cases` → points at the new `guide_revision_id`.
+3. Panel / decisions / close: same as flow 1 steps 5–7.
+4. **On approval**: `guides.current_revision_id` → the new revision. `guides.slug` is **not** changed even if the title changed (slug frozen at first publish). The previous revision stays in history.
+
+**Rollback** is a special edit: insert a new revision copying an older snapshot's content (with a `change_summary` noting the rollback), then move `current_revision_id` to it. Older rows are never deleted.
+
+### 4. Vote on a guide (and trigger re-review)
+
+1. `votes` → insert: `(voter_id, guide_id)` composite PK, `direction`. On `down`, `reason` (rubric enum) is required; `note` optional. Re-voting updates the existing row (one vote per voter per guide).
+2. **Canonical recompute** (derived, not stored): net votes order siblings under a guide base. If a non-canonical sibling overtakes the canonical guide, `guide_bases.canonical_guide_id` is repointed. No rank column is written.
+3. **Re-review trigger** (post-publish, fired by accumulated votes):
+  - `review_cases` → `case_type = 're_review'`, opened by the system/moderator.
+  - `re_review_cases` → `guide_id`, `trigger_type` (`ratio | rubric_weighted | section_density`).
+  - Panel is drawn from the **moderator** pool (not verifiers), then decisions/close as in flow 1.
+
+### 5. File a dispute
+
+A member contests content, a reviewer's conduct, a governance decision, or a cross-subject conflict.
+
+1. `review_cases` → `case_type = 'dispute'`, `created_by = filer`.
+2. `disputes` → `dispute_type`, `target_type` + `target_id` (polymorphic; allowed target depends on type — `guide`, `guide_base`, `profile`, or null for `governance`), `claim_text`.
+3. **Moderator** panel → decisions → close (flow 1 shape).
+4. **If `cross_subject` resolves into a spin-off**: `guide_bases` → insert a new subject-specific node with `forked_from_guide_base_id` = the original. The fork is an explicit, governed exception to "one canonical base per topic."
+
+### 6. Appeal a resolved case
+
+1. `review_cases` → `case_type = 'appeal'`, `created_by = appellant`.
+2. `appeals` → `appealed_case_id` (the prior resolved case being challenged), `appeal_reason`. An appeal targets a **case**, not content.
+3. **Moderator** panel → decisions → close. Outcome may overturn the original ruling, driving the corresponding publish/edit/disposition change.
+
+### 7. Declare prerequisites and graph edges
+
+When authoring a guide base, the author wires it into the graph.
+
+- **Real prerequisite exists**: `guide_edges` → insert `from_guide_base_id`, `to_guide_base_id`, `edge_type = 'prerequisite'`. A trigger rejects the insert if it would create a prerequisite cycle.
+- **Related link**: `guide_edges` → insert with `edge_type = 'related'`, pair swapped into canonical order (`from < to`) by the `addRelation` helper so `(A,B)`/`(B,A)` cannot both exist.
+- **Prerequisite topic does not exist yet**: `todo_prerequisites` → insert `dependent_guide_base_id`, `title` (free text), `status = 'open'`. Acts as a recruitment surface.
+- **TODO later filled**: when a real base is created for that topic, `todo_prerequisites` → set `status = 'resolved'`, `resolved_guide_base_id` = the new base; typically a real `prerequisite` edge is added in `guide_edges` at the same time.
+
+### 8. Tag a topic into subjects
+
+1. `subjects` → row exists (or insert if new, governance-gated).
+2. `guide_subjects` → insert `(guide_base_id, subject_id)` per tag. One base can be tagged into several subjects; the composite PK blocks duplicate tags. Subject views, frontiers, and floors then filter the global graph through these rows.
+
