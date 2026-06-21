@@ -1,11 +1,11 @@
-import type { Path } from "@/types/paths";
+import type { HydratedPath, Path } from "@/types/paths";
 
 import { Separator } from "@/components/ui/separator";
 import { PathCard } from "@/components/cards/PathCard";
 
 
 type PropTypes = {
-  paths: Array<Path>;
+  paths: Array<HydratedPath>;
   type: string;
 }
 
