@@ -1,4 +1,4 @@
-import { Search, User, Menu, X } from "lucide-react"
+import { Menu, Search, User, X } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import { useState } from "react"
 
@@ -47,7 +47,7 @@ export function Navbar() {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground transition-colors"
+                  className="font-mono text-xs uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {item.label}
                 </Link>
@@ -62,20 +62,22 @@ export function Navbar() {
             <div className="relative hidden lg:block w-[280px]">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search concepts..."
-                className="h-9 pl-9 font-mono text-xs rounded-md border"
+                placeholder="Search guides..."
+                className="h-9 pl-9 text-xs rounded-md border text-xs"
               />
             </div>
 
-            {/* Contribute (desktop only) */}
-            <Button
-              size="lg"
-              className="hidden md:flex rounded-md font-mono text-[11px] uppercase tracking-[0.08em]"
-            >
-              Contribute
-            </Button>
+            {/* Contribute Button */}
+            <div className="hidden md:flex">
+              <Link
+                to="/contribute"
+                className="tracking-[0.08em] btn-cta"
+              >
+                Contribute
+              </Link>
+            </div>
 
-            {/* Profile (desktop only) */}
+            {/* Desktop Profile Dropdown */}
             <div className="hidden md:block">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -91,21 +93,22 @@ export function Navbar() {
                 <DropdownMenuContent align="end" className="w-48 font-mono">
                   {profileItems.map((item) => (
                     <DropdownMenuItem key={item.to} asChild>
-                      <Link to={item.to}>{item.label}</Link>
+                      <Link to={item.to} className="text-xs">{item.label}</Link>
                     </DropdownMenuItem>
                   ))}
 
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem asChild>
-                    <Link to="/logout">Sign Out</Link>
+                    <Link to="/" className="text-destructive text-xs">Sign Out</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
 
-          {/* MOBILE MENU BUTTON */}
+          {/* MOBILE */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden relative">
             <Button
               variant="ghost"
@@ -118,18 +121,18 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* MOBILE DROPDOWN */}
+        {/* Mobile Dropdown */}
         {mobileOpen && (
-          <div className="md:hidden absolute right-0 top-[65px] z-50 w-screen p-4 rounded-b-md border bg-white shadow-md animate-in fade-in slide-in-from-top-2">
+          <div className="md:hidden absolute left-0 right-0 top-[65px] p-5 z-50 rounded-b-md border bg-white shadow-md animate-in fade-in slide-in-from-top-2">
 
-            <div className="flex flex-col gap-4 p-4">
+            <div className="flex flex-col gap-y-4">
 
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search..."
-                  className="h-9 pl-9 text-xs font-mono"
+                  className="h-9 pl-9 text-xs"
                 />
               </div>
 
@@ -146,36 +149,36 @@ export function Navbar() {
                   </Link>
                 ))}
 
-              <Separator />
+                <Separator />
 
                 <Link
                   key="/contribute"
                   to="/contribute"
                   onClick={() => setMobileOpen(false)}
-                  className="py-3 text-sm font-mono uppercase text-muted-foreground hover:text-foreground"
+                  className="tracking-[0.08em] btn-cta"
                 >
                   Contribute
                 </Link>
 
-              <Separator />
+                <Separator />
 
                 {profileItems.map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
                     onClick={() => setMobileOpen(false)}
-                    className="py-3 text-sm font-mono uppercase text-muted-foreground hover:text-foreground"
+                    className="py-2 text-sm font-mono uppercase text-muted-foreground hover:text-foreground"
                   >
                     {item.label}
                   </Link>
                 ))}
 
-              <Separator />
+                <Separator />
 
                 <Link
-                  to="/logout"
+                  to="/"
                   onClick={() => setMobileOpen(false)}
-                  className="py-3 text-sm font-mono uppercase text-red-500 hover:text-red-600"
+                  className="py-3 text-sm font-mono uppercase text-destructive"
                 >
                   Sign Out
                 </Link>

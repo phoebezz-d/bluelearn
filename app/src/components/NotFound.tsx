@@ -1,8 +1,21 @@
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
+
 export const NotFound = () => {
   return (
     <main className="container mx-auto p-4 pt-16">
-      <h1>404</h1>
-      <p>The requested page could not be found.</p>
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle className="data-label">404 - Not Found</EmptyTitle>
+          <EmptyDescription className="data-value">
+            The page you&apos;re looking for doesn&apos;t exist.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     </main>
   )
 }
