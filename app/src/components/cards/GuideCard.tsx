@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 import { Route as GuideRoute } from "@/routes/guides.$slug"
-import { formatDuration } from "@/lib/utils"
+import { formatDuration } from "@/lib/guideUtils"
 
 
 type PropTypes = {

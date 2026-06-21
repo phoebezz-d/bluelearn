@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { Route as LearningPathRoute } from "@/routes/paths.$slug";
-import { formatDuration } from "@/lib/utils";
+import { formatDuration } from "@/lib/guideUtils";
 
 
 type PropTypes = {

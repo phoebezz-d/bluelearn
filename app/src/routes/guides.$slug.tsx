@@ -2,11 +2,8 @@ import { createFileRoute } from "@tanstack/react-router"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { useMemo } from "react"
-import { unified } from "unified"
-import remarkParse from "remark-parse"
 import {
   Bookmark,
-  ChevronDown,
   ExternalLink,
   Flag,
   MessageSquare,
@@ -17,60 +14,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 import guides from "@/data/guides.json"
+import { extractHeadings } from "@/lib/guideUtils"
+import { CollapsibleSection } from "@/components/CollapsibleSection"
 
 export const Route = createFileRoute("/guides/$slug")({
   component: RouteComponent,
 })
-
-/* COLLAPSIBLE */
-function CollapsibleSection({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <details className="group border-b py-4">
-      <summary className="flex cursor-pointer list-none items-center justify-between data-label">
-        {title}
-        <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="mt-4 space-y-2 text-sm">{children}</div>
-    </details>
-  )
-}
-
-/* =========================
-   EXTRACT HEADINGS FROM MARKDOWN
-========================= */
-
-function extractHeadings(markdown: string) {
-  const tree = unified().use(remarkParse).parse(markdown)
-
-  const headings: Array<{ text: string; level: number }> = []
-
-  function walk(node: any) {
-    if (node.type === "heading") {
-      const text = node.children
-        ?.map((c: any) => c.value)
-        .join("") || ""
-
-      headings.push({
-        text,
-        level: node.depth,
-      })
-    }
-
-    if (node.children) {
-      node.children.forEach(walk)
-    }
-  }
-
-  walk(tree)
-
-  return headings
-}
 
 function RouteComponent() {
   const headings = useMemo(() => extractHeadings(guides[0].content), [])
@@ -187,7 +136,7 @@ function RouteComponent() {
             </h1>
 
             <div className="mt-3 mono-micro">
-              {guides[0].author} • {guides[0].date}
+              {guides[0].author} • {guides[0].created_at}
             </div>
 
             <div className="mt-4 flex gap-2">

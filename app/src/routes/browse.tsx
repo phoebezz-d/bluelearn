@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { PathCard } from "@/components/cards/PathCard";
-import { GuideCard } from "@/components/cards/GuideCard";
 
 import { hydratePaths } from "@/lib/getData";
 

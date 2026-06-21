@@ -1,4 +1,4 @@
-import type { HydratedPath, Path } from "@/types/paths";
+import type { HydratedPath } from "@/types/paths";
 
 import { Separator } from "@/components/ui/separator";
 import { PathCard } from "@/components/cards/PathCard";
@@ -25,8 +25,7 @@ export const FeaturedRow = ({ paths, type }: PropTypes) => {
 
       {/* Paths */}
       <div className="flex gap-6 overflow-x-auto p-2 scrollbar-thin">
-        {paths.map((path: Path) => (
-
+        {paths.map((path: HydratedPath) => (
           <div
             key={path.slug}
             className="w-[550px] shrink-0"

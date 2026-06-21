@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import type { HydratedPath, Path } from "@/types/paths"
+import type { HydratedPath } from "@/types/paths"
 
 import { Separator } from "@/components/ui/separator"
 import { PathCard } from "@/components/cards/PathCard"

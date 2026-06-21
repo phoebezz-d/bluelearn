@@ -1,20 +1,28 @@
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { Search, SlidersHorizontal, X } from "lucide-react"
 
+import type { HydratedPath } from "@/types/paths"
+
 import { Route as SubjectRoute } from "@/routes/subjects.$slug"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { FeaturedRow } from "@/components/FeaturedRow"
+import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { FeaturedRow } from "@/components/FeaturedRow"
 
 import subjects from "@/data/subjects.json"
 import paths from "@/data/paths.json"
-import { Badge } from "@/components/ui/badge"
+import guides from "@/data/guides.json"
+
+import { hydratePaths } from "@/lib/getData"
+
 
 export const Route = createFileRoute("/")({ component: RouteComponent })
 
 function RouteComponent() {
+  const hydratedPaths: Array<HydratedPath> = hydratePaths(guides, paths);
+
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
       {/* Hero */}
@@ -106,8 +114,8 @@ function RouteComponent() {
       </section>
 
       {/* Featured Section */}
-      <FeaturedRow paths={paths} type={"Recently Added"} />
-      <FeaturedRow paths={paths} type={"Popular This Week"} />
+      <FeaturedRow paths={hydratedPaths} type={"Recently Added"} />
+      <FeaturedRow paths={hydratedPaths} type={"Popular This Week"} />
 
     </div>
   )

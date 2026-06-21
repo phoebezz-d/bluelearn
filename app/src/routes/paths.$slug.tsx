@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { GuideCard } from "@/components/cards/GuideCard"
 
 import { getPathBySlug, hydratePaths } from "@/lib/getData";
-import { formatDuration } from "@/lib/utils";
+import { formatDuration } from "@/lib/guideUtils";
 
 import paths from "@/data/paths.json"
 import guides from "@/data/guides.json"
