@@ -1,0 +1,17 @@
+type: object
+description: A guide (method/alternative) under a topic.
+properties:
+  id:
+    $ref: '../common/Uuid.yaml'
+  slug:
+    type: [string, 'null']
+    example: physics-based
+  title:
+    type: string
+    example: Physics-based approach
+  summary:
+    type: [string, 'null']
+  is_canonical:
+    type: boolean
+    example: false
+required: [id, title]

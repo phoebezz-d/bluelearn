@@ -1,0 +1,104 @@
+# Path items for /prerequisites and /todos. Referenced from ../openapi.yaml.
+/prerequisites:
+  post:
+    tags: [graph]
+    summary: Add a prerequisite edge
+    operationId: addPrerequisite
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              from_guide_base_id:
+                $ref: '../components/schemas/common/Uuid.yaml'
+              to_guide_base_id:
+                $ref: '../components/schemas/common/Uuid.yaml'
+              reason:
+                type: [string, 'null']
+                description: Optional explanation.
+                example: Optional explanation
+            required: [from_guide_base_id, to_guide_base_id]
+    responses:
+      '201':
+        description: The created edge
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                edge:
+                  type: object
+                  properties:
+                    id:
+                      $ref: '../components/schemas/common/Uuid.yaml'
+                    from_guide_base_id:
+                      $ref: '../components/schemas/common/Uuid.yaml'
+                    to_guide_base_id:
+                      $ref: '../components/schemas/common/Uuid.yaml'
+                    edge_type:
+                      type: string
+                      enum: [prerequisite, related]
+                      example: prerequisite
+                    is_suspended:
+                      type: boolean
+                      example: false
+                    created_at:
+                      $ref: '../components/schemas/common/Timestamp.yaml'
+                  required: [id, from_guide_base_id, to_guide_base_id, edge_type, is_suspended]
+              required: [edge]
+      '501':
+        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+
+/prerequisites/{id}:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        $ref: '../components/schemas/common/Uuid.yaml'
+  delete:
+    tags: [graph]
+    summary: Remove a prerequisite edge
+    operationId: removePrerequisite
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Edge removed
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                removed:
+                  type: boolean
+                  example: true
+              required: [removed]
+      '501':
+        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+
+/todos:
+  get:
+    tags: [graph]
+    summary: List open TODO prerequisites
+    description: All open TODO prerequisites declared across topics.
+    operationId: listTodos
+    responses:
+      '200':
+        description: Open TODO prerequisites
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                todos:
+                  type: array
+                  items:
+                    $ref: '../components/schemas/guides/Todo.yaml'
+              required: [todos]
+      '501':
+        $ref: '../components/responses/_shared.yaml#/NotImplemented'

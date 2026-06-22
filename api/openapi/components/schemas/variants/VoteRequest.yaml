@@ -1,0 +1,13 @@
+type: object
+description: Cast or update the caller's vote. reason is required iff direction is down.
+properties:
+  direction:
+    type: string
+    enum: [up, down]
+    example: up
+  reason:
+    $ref: './DownvoteReason.yaml'
+  note:
+    type: [string, 'null']
+    example: Clear and well-paced.
+required: [direction]

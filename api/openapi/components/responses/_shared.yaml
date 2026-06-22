@@ -1,0 +1,31 @@
+# Reusable responses, referenced as ../components/responses/_shared.yaml#/<Name>
+BadRequest:
+  description: Validation failed
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common/Error.yaml'
+Unauthorized:
+  description: Missing or invalid auth token
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common/Error.yaml'
+NotFound:
+  description: Resource not found (or not permitted; RLS reports that as zero rows)
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common/Error.yaml'
+Conflict:
+  description: Unique constraint violation
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common/Error.yaml'
+NotImplemented:
+  description: Route is declared but not yet implemented (returns 501)
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common/Error.yaml'

@@ -1,0 +1,19 @@
+type: object
+properties:
+  title:
+    type: string
+    minLength: 1
+    maxLength: 200
+    example: Calculus
+  knowledge_type:
+    $ref: './KnowledgeType.yaml'
+  summary:
+    type: [string, 'null']
+    maxLength: 500
+    example: The study of continuous change.
+  body:
+    type: [string, 'null']
+    example: |
+      # Calculus
+      ...
+required: [title, knowledge_type]

@@ -1,0 +1,15 @@
+type: object
+description: Public-facing profile (internal id omitted).
+properties:
+  username:
+    type: string
+    example: tony
+  display_name:
+    type: [string, 'null']
+    example: Tony
+  bio:
+    type: [string, 'null']
+    example: Learning math
+  created_at:
+    $ref: '../common/Timestamp.yaml'
+required: [username]

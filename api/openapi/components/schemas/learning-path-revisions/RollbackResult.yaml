@@ -1,0 +1,16 @@
+type: object
+description: The node delta a rollback applied (cloning an older revision into a new draft).
+properties:
+  added_nodes:
+    type: array
+    items:
+      $ref: './PathNode.yaml'
+  removed_nodes:
+    type: array
+    items:
+      $ref: './PathNode.yaml'
+  changed_nodes:
+    type: array
+    items:
+      $ref: './PathNode.yaml'
+required: [added_nodes, removed_nodes, changed_nodes]
