@@ -6,6 +6,7 @@ import type {
 } from "@/types/guides";
 import type { HydratedPath, Path } from "@/types/paths"
 
+
 // TODO: update to fetch from api
 export const getPathBySlug = (paths: Array<Path>, slug: string) => {
   const foundPath = paths.find(path => path.slug === slug);
@@ -29,7 +30,7 @@ export const createGuideMap = (guides: Array<Guide>): Record<string, Guide> => {
 }
 
 export const createSubjectMap = (
-  subjects: Subject[]
+  subjects: Array<Subject>
 ): Record<string, Subject> => {
   const subjectMap = subjects.reduce<Record<string, Subject>>(
     (acc, subject) => {
@@ -42,7 +43,7 @@ export const createSubjectMap = (
   return subjectMap;
 };
 
-// TODO: when integrating api hydration should be done on the backend - change this to fetch from api
+// TODO: when integrating api, hydration should be done on the backend - change this to fetch from api
 export const hydratePaths = (guides: Array<Guide>, paths: Array<Path>): Array<HydratedPath> => {
   const guideMap = createGuideMap(guides);
 
@@ -71,7 +72,6 @@ export const hydrateGuide = (
 
     tags: guide.tags
       .map((slug) => subjectMap[slug])
-      .filter((subject): subject is Subject => !!subject)
       .map<SubjectReference>((subject) => ({
         slug: subjectMap[subject.slug].slug,
         name: subjectMap[subject.slug].name
@@ -79,10 +79,9 @@ export const hydrateGuide = (
 
     prerequisites: guide.prerequisites
       .map((slug) => guideMap[slug])
-      .filter((guide): guide is Guide => !!guide)
-      .map<GuideReference>((guide) => ({
-        slug: guide.slug,
-        title: guide.title,
+      .map<GuideReference>((prereq) => ({
+        slug: prereq.slug,
+        title: prereq.title,
       })),
   };
 };

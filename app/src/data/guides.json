@@ -155,7 +155,7 @@
     "duration": 15,
     "tags": [
       "ai",
-      "machine learning"
+      "machine-learning"
     ],
     "breadcrumbs": [
       "Home",
@@ -199,7 +199,7 @@
     "duration": 15,
     "tags": [
       "programming",
-      "computer science"
+      "computer-science"
     ],
     "breadcrumbs": [
       "Home",
@@ -217,8 +217,8 @@
     "created_at": "14th June 2026",
     "duration": 15,
     "tags": [
-      "computer science",
-      "data structures"
+      "computer-science",
+      "data-structures"
     ],
     "breadcrumbs": [
       "Home",
@@ -260,7 +260,7 @@
     "created_at": "14th June 2026",
     "duration": 15,
     "tags": [
-      "game development"
+      "game-development"
     ],
     "breadcrumbs": [
       "Home",
@@ -302,7 +302,7 @@
     "created_at": "14th June 2026",
     "duration": 15,
     "tags": [
-      "game development",
+      "game-development",
       "unity",
       "3d"
     ],
@@ -324,7 +324,7 @@
     "created_at": "14th June 2026",
     "duration": 15,
     "tags": [
-      "game development",
+      "game-development",
       "unity",
       "programming"
     ],

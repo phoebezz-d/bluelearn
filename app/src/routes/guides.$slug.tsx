@@ -9,6 +9,7 @@ import {
   Pencil,
 } from "lucide-react"
 
+import type { SubjectReference } from "@/types/subjects"
 import type { GuideReference, HydratedGuide } from "@/types/guides"
 
 import { Separator } from "@/components/ui/separator"
@@ -22,7 +23,6 @@ import { getGuideBySlug, hydrateGuide } from "@/lib/getData"
 
 import guides from "@/data/guides.json"
 import subjects from "@/data/subjects.json"
-import type { SubjectReference } from "@/types/subjects"
 
 export const Route = createFileRoute("/guides/$slug")({
   component: RouteComponent,
