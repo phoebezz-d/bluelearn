@@ -41,7 +41,7 @@
   patch:
     tags: [learning-path-revisions]
     summary: Overwrite a draft revision's metadata
-    description: Pre-submit only.
+    description: Draft only; a published revision is immutable.
     operationId: updatePathRevision
     security:
       - bearerAuth: []
@@ -66,6 +66,8 @@
         $ref: '../components/responses/_shared.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
 
@@ -76,25 +78,6 @@
       required: true
       schema:
         $ref: '../components/schemas/common/Uuid.yaml'
-  get:
-    tags: [learning-path-revisions]
-    summary: List the revision's included nodes
-    operationId: listPathNodes
-    responses:
-      '200':
-        description: Included nodes
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                nodes:
-                  type: array
-                  items:
-                    $ref: '../components/schemas/learning-path-revisions/PathNode.yaml'
-              required: [nodes]
-      '404':
-        $ref: '../components/responses/_shared.yaml#/NotFound'
   post:
     tags: [learning-path-revisions]
     summary: Re-include a skipped guide as a node
@@ -122,6 +105,8 @@
         $ref: '../components/responses/_shared.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
 
@@ -166,6 +151,8 @@
         $ref: '../components/responses/_shared.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
   delete:
@@ -180,10 +167,12 @@
         description: Node removed
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
 
-/path-revisions/{id}/submit:
+/path-revisions/{id}/publish:
   parameters:
     - name: id
       in: path
@@ -192,24 +181,26 @@
         $ref: '../components/schemas/common/Uuid.yaml'
   post:
     tags: [learning-path-revisions]
-    summary: Submit for review
-    description: Flips to submitted and opens a review case.
-    operationId: submitPathRevision
+    summary: Publish the revision
+    description: Publishes the draft directly (no review gate); freezes its edges and points the path at it.
+    operationId: publishPathRevision
     security:
       - bearerAuth: []
     responses:
-      '201':
-        description: Review case opened
+      '200':
+        description: Published
         content:
           application/json:
             schema:
               type: object
               properties:
-                review_case_id:
-                  $ref: '../components/schemas/common/Uuid.yaml'
-              required: [review_case_id]
+                slug:
+                  type: string
+              required: [slug]
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
 
@@ -252,6 +243,8 @@
         $ref: '../components/responses/_shared.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
 

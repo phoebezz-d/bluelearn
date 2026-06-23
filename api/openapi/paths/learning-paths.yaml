@@ -48,6 +48,8 @@
         $ref: '../components/responses/_shared.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
 
 /paths/{slug}:
   parameters:
@@ -110,6 +112,8 @@
                 status: archived
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
 
@@ -136,7 +140,7 @@
                 revisions:
                   type: array
                   items:
-                    $ref: '../components/schemas/common/RevisionListItem.yaml'
+                    $ref: '../components/schemas/learning-path-revisions/LearningPathRevisionListItem.yaml'
               required: [revisions]
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
@@ -159,5 +163,7 @@
               required: [revision_id]
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'

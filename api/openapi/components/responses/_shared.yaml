@@ -18,6 +18,14 @@ Unauthorized:
         $ref: '../schemas/common/Error.yaml'
       example:
         error: Unauthorized
+Forbidden:
+  description: Authenticated but lacking the required role (e.g. not a curator)
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common/Error.yaml'
+      example:
+        error: Forbidden
 NotFound:
   description: Resource not found (or not permitted; RLS reports that as zero rows)
   content:

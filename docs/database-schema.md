@@ -16,9 +16,11 @@ The schema deliberately keeps the database source of truth small:
 - Do not store values that can be derived from the graph.
 
 ## Entity Relationship Diagram
-![Entity Relationship Diagram](images/erd.png)
+
+Entity Relationship Diagram
 
 ## Tables
+
 ### `profiles`
 
 - `id`: primary key, references the auth user.
@@ -38,8 +40,6 @@ The roles a user holds. A user may hold several at once (e.g. both `verifier` an
 - `user_id`: FK to `profiles.id`.
 - `role`: granted role enum `verifier | moderator | curator | admin`.
 - `granted_at`: when the role was granted.
-
-`curator` authorizes authoring learning paths: only a holder may create a `learning_paths` row and write its revisions (see [`learning_paths`](#learning_paths)). It gates the *creation* side the way `verifier`/`moderator` gate the *review* side, and is not a moderation privilege.
 
 For now, roles are granted directly by an admin inserting the `user_roles` row. A self-service application flow is deferred for later; see [Role applications](#role-applications) under Not Yet Implemented.
 
@@ -260,10 +260,11 @@ Append-only version history plus the path's editorial metadata, mirroring `guide
 - `summary`: short description for listings and the path header, as of this revision.
 - `change_summary`: curator's note describing what changed in this revision (like a commit message), driving the history list.
 - `author_id`: who authored this specific revision, who must hold the `curator` role. May differ from the path's original `created_by`, spreading curation credit.
-- `status`: draft lifecycle state `draft | submitted` only (the same shape and rationale as `guide_revisions.status`). The review verdict is not stored here; it is derived from the revision's `learning_path_review_cases` → `review_cases.status`.
-- `created_at`: when the revision was created.
+- `status`: lifecycle state `draft | published`. Learning paths have **no review gate**, so there is no `submitted` (awaiting review) state as on `guide_revisions`; a revision is either an editable draft or one a curator has published.
+- `created_at`: when the revision (its draft) was created.
+- `published_at`: when this revision went live, null until then.
 
-Submitting a revision creates its `review_cases` (+ `learning_path_review_cases`) row in the same transaction that sets `status = submitted`, exactly like submitting a guide revision. A revision "reads as approved" when its case is `approved`; `published`/`archived` are node-level and live on `learning_paths`.
+Submitting a revision is a direct publish: in one transaction it flips `status = draft → published`, stamps `published_at`, freezes the revision's projected edges, and points `learning_paths.current_revision_id` at it (setting `learning_paths.status = published`, and freezing the slug on first publish). Whether a revision is currently live is read from `learning_paths.current_revision_id`, not from its status.
 
 ### `learning_path_revision_nodes`
 
@@ -317,7 +318,7 @@ Verifier gates, post-publish re-reviews, disputes, and appeals all share the sam
 The item being reviewed.
 
 - `id`: primary key of the case.
-- `case_type`: what work the case represents: `guide_publish` | `guide_edit` | `learning_path_publish` | `learning_path_edit` | `dispute` | `appeal` | `re_review`.
+- `case_type`: what work the case represents: `guide_publish` | `guide_edit` | `dispute` | `appeal` | `re_review`.
 - `status`: lifecycle state: `pending` | `in_review` | `approved` | `rejected`.
 - `created_by`: the user who opened the case (author for publish/edit/appeal, filer for dispute).
 - `created_at`: when the case was created.
@@ -326,7 +327,7 @@ The item being reviewed.
 
 `review_panels`:
 
-An odd-numbered random group of panelists assembled to decide a case, drawn from the pool that matches the case type: **verifiers** for `guide_publish`/`guide_edit`/`learning_path_publish`/`learning_path_edit`, **moderators** for `re_review`/`dispute`/`appeal`.
+An odd-numbered random group of panelists assembled to decide a case, drawn from the pool that matches the case type: **verifiers** for `guide_publish`/`guide_edit`, **moderators** for `re_review`/`dispute`/`appeal`.
 
 - `id`: primary key of the panel.
 - `case_id`: the case this panel decides (FK to `review_cases`). One case may have many panels.
@@ -381,11 +382,6 @@ Each attaches type-specific data to a `review_cases` row. `case_id` is both prim
 
 - `case_id`: PK and FK to `review_cases`.
 - `guide_revision_id`: FK to `guide_revisions` — the exact guide revision under review. All content lives in one revision table now, so this is a single FK (no polymorphic split). It pins the panel to the exact snapshot it judged, so the decision stays attached to specific content after later edits.
-
-`learning_path_review_cases` (for `learning_path_publish`, `learning_path_edit`):
-
-- `case_id`: PK and FK to `review_cases`.
-- `learning_path_revision_id`: FK to `learning_path_revisions` — the exact path revision under review. Pins the panel to the precise snapshot it judged (targets, included nodes, chosen variants, metadata), so the decision stays attached to that snapshot after the curator drafts further revisions. The panel is drawn from the **verifier** pool, the same pre-publish structural gate used for `guide_publish`/`guide_edit`.
 
 `re_review_cases`:
 
@@ -583,7 +579,7 @@ CREATE INDEX guide_edges_to_guide_base_id ON guide_edges (to_guide_base_id);
 
 `review_panels.target_seat_count` is decided at assembly time, in three steps:
 
-1. **Policy default per `case_type`.** A baseline count, e.g. `guide_publish`/`guide_edit`/`learning_path_publish`/`learning_path_edit` → 3 verifiers, `dispute`/`appeal`/`re_review` → 5 moderators (numbers illustrative). Higher-stakes governance gets a larger panel. This is a small static map (one odd number per `case_type`) that changes only on a policy decision, so it lives as an app-level constant, not a table. The value is read here and copied onto the panel, which freezes it.
+1. **Policy default per `case_type`.** A baseline count, e.g. `guide_publish`/`guide_edit` → 3 verifiers, `dispute`/`appeal`/`re_review` → 5 moderators (numbers illustrative). Higher-stakes governance gets a larger panel. This is a small static map (one odd number per `case_type`) that changes only on a policy decision, so it lives as an app-level constant, not a table. The value is read here and copied onto the panel, which freezes it.
 2. **Clamp to the eligible pool.** The eligible pool is the role pool that matches the case type (verifiers vs moderators) minus anyone recused, conflicted, suspended (`profiles.is_suspended`), or the case author. You cannot seat more panelists than exist: `target = min(policy_default, eligible_pool_size)`.
 3. **Round down to odd.** A majority must always be decidable, so an even clamp is reduced by one (`4 → 3`). A pool too small to seat the minimum (e.g. fewer than 3 eligible) blocks assembly rather than seating an even or trivially small panel.
 
@@ -683,9 +679,13 @@ Potential shape: a `role_applications` table.
 
 Approval inserts the matching `user_roles` row. A partial unique index on `(user_id, role) WHERE status = 'pending'` stops a user stacking duplicate open applications for the same role.
 
+#### Learning path review gate
+
+Learning paths currently have **no review gate**: a curator's submit publishes the revision directly (flip to `published`, project edges, point `current_revision_id` at it), with no `review_cases` involved. A future gate would reuse the shared review machinery exactly like guides: add `learning_path_publish` / `learning_path_edit` back to the `case_type` enum and a `learning_path_review_cases` satellite (PK/FK `case_id`, plus `learning_path_revision_id` pinning the exact snapshot under review), drawn from the **verifier** pool. Submit would then open a case instead of publishing, and a revision would "read as approved" from its case before going live.
+
 #### Learning path post-publish governance
 
-The first-pass learning path schema covers authoring, pre-publish verifier review, and frozen publishing. Post-publish governance (learner **votes** on a path, vote-triggered **re-review**, **disputes** against a path, and **content holds** (hide/purge) over a path) is deliberately deferred. Paths reference guides that already carry their own votes, holds, and disputes, so a bad guide is still governed at the guide level; what is missing is governance of the *curation* itself (e.g. a path that skips a load-bearing prerequisite or pushes a fringe variant). When added, it should reuse the same machinery rather than grow a parallel one: a `re_review`/`dispute` case type targeting a `learning_path_id`, and a `content_holds` scope column for paths.
+The first-pass learning path schema covers authoring and frozen publishing. Post-publish governance (learner **votes** on a path, vote-triggered **re-review**, **disputes** against a path, and **content holds** (hide/purge) over a path) is deliberately deferred. Paths reference guides that already carry their own votes, holds, and disputes, so a bad guide is still governed at the guide level; what is missing is governance of the *curation* itself (e.g. a path that skips a load-bearing prerequisite or pushes a fringe variant). When added, it should reuse the same machinery rather than grow a parallel one: a `re_review`/`dispute` case type targeting a `learning_path_id`, and a `content_holds` scope column for paths.
 
 ---
 
@@ -808,13 +808,12 @@ A curator builds a curated curriculum from one or more targets. Most of the work
 3. **Pick targets:** the curator chooses one or more goal topics (and a variant for each). These are held in the editor until seeding; a target becomes a node flagged `is_target` in the next step.
 4. **Seed the curriculum:** the system computes the transitive prerequisite DAG closure of the chosen targets over `guide_edges`, picks a default variant per topic, and immediately materializes the whole closure: `learning_path_revision_nodes` → insert one row per closure topic (`revision_id`, `guide_base_id`, `guide_id`), setting `is_target = true` (with the curator's chosen variant) on the target topics and `false` on the rest. The draft starts as "everything included," and the curator narrows from there. Seeding into the real table (rather than holding the set in memory until submit) keeps a node row's meaning identical in every state. A row present means the topic is included; an absent row means it is excluded, so a `draft` revision and a `published` one read the same way, and submit needs no convert-set-into-rows step. The draft persists server-side, so the curator can leave and resume.
 5. **Curator edits the draft in place:** skip a prerequisite → `learning_path_revision_nodes` delete that `(revision_id, guide_base_id)` row. Swap a variant → update that row's `guide_id`. Annotate → set `note`. Edit metadata → update the revision's `title`/`summary`. Drafts are mutable up to submission (same as guide draft revisions). Whatever rows remain at submit *are* the included set, with no further translation.
-6. **Submit for review**: `learning_path_revisions` → `status = 'submitted'`; `review_cases` → insert root `case_type = 'learning_path_publish'` (revision 1) or `'learning_path_edit'` (later revisions), `status = 'pending'`, `created_by = author`; `learning_path_review_cases` → insert satellite `case_id`, `learning_path_revision_id`.
-7. **Panel / decisions / close:** identical to flow 1 steps 5–7, drawn from the **verifier** pool.
-8. **On approval** (publish, one transaction):
+6. **Submit (direct publish), one transaction** (no review gate for now):
+  - `learning_path_revisions` → `status = 'published'`, `published_at = now()`.
   - **Freeze the projection.** Project the current `guide_edges` graph onto the revision's included node set, bridging excluded topics, and `learning_path_revision_edges` → insert one row per projected edge: `revision_id`, `from_guide_base_id`, `to_guide_base_id`. This is the only time these rows are written; the revision is now immutable.
   - `learning_paths` → set `current_revision_id` = this revision, `status = 'published'`, and on revision 1 `slug = slugify(revision.title)` (frozen from here).
 
-On rejection nothing publishes; the revision stays a rejected snapshot (verdict derived from the case) and the curator may revise and resubmit, which creates a new revision and a new case. A later edit is the same flow starting at step 2 with `case_type = 'learning_path_edit'`; on approval `current_revision_id` repoints and the slug is untouched. **Rollback** is a soft rollback: create a new revision cloning an older revision's targets/nodes, submit, and on approval repoint `current_revision_id`.
+A later edit is the same flow starting at step 2; on submit `current_revision_id` repoints and the slug is untouched. **Rollback** is a soft rollback: create a new revision cloning an older revision's targets/nodes, then submit to repoint `current_revision_id`. (A pre-publish gate is [deferred](#learning-path-review-gate); if added, submit would open a verifier case instead of publishing outright.)
 
 ### 12. Open a learning path
 

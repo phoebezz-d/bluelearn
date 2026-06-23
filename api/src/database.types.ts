@@ -282,36 +282,6 @@ export type Database = {
           },
         ]
       }
-      learning_path_review_cases: {
-        Row: {
-          case_id: string
-          learning_path_revision_id: string
-        }
-        Insert: {
-          case_id: string
-          learning_path_revision_id: string
-        }
-        Update: {
-          case_id?: string
-          learning_path_revision_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_path_review_cases_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: true
-            referencedRelation: "review_cases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_path_review_cases_learning_path_revision_id_fkey"
-            columns: ["learning_path_revision_id"]
-            isOneToOne: false
-            referencedRelation: "learning_path_revisions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       learning_path_revision_edges: {
         Row: {
           from_guide_base_id: string
@@ -391,7 +361,8 @@ export type Database = {
           created_at: string
           id: string
           learning_path_id: string
-          status: Database["public"]["Enums"]["revision_status"]
+          published_at: string | null
+          status: Database["public"]["Enums"]["learning_path_revision_status"]
           summary: string | null
           title: string | null
         }
@@ -401,7 +372,8 @@ export type Database = {
           created_at?: string
           id?: string
           learning_path_id: string
-          status?: Database["public"]["Enums"]["revision_status"]
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["learning_path_revision_status"]
           summary?: string | null
           title?: string | null
         }
@@ -411,7 +383,8 @@ export type Database = {
           created_at?: string
           id?: string
           learning_path_id?: string
-          status?: Database["public"]["Enums"]["revision_status"]
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["learning_path_revision_status"]
           summary?: string | null
           title?: string | null
         }
@@ -911,6 +884,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_learning_path: {
+        Args: { p_summary?: string; p_targets: string[]; p_title?: string }
+        Returns: string
+      }
       create_variant: {
         Args: {
           p_body?: string
@@ -924,6 +901,17 @@ export type Database = {
         Args: { check_role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      project_path_edges: {
+        Args: { p_revision_id: string }
+        Returns: {
+          from_guide_base_id: string
+          to_guide_base_id: string
+        }[]
+      }
+      publish_learning_path_revision: {
+        Args: { p_revision_id: string }
+        Returns: string
+      }
       submit_guide_revision: {
         Args: { p_revision_id: string }
         Returns: string
@@ -932,11 +920,7 @@ export type Database = {
     Enums: {
       app_role: "verifier" | "moderator" | "curator" | "admin"
       case_status: "pending" | "in_review" | "approved" | "rejected"
-      case_type:
-        | "guide_publish"
-        | "guide_edit"
-        | "learning_path_publish"
-        | "learning_path_edit"
+      case_type: "guide_publish" | "guide_edit"
       decision_reason:
         | "hierarchy_issue"
         | "factual_error"
@@ -955,6 +939,7 @@ export type Database = {
         | "scope_creep"
       edge_type: "prerequisite" | "related"
       knowledge_type: "theory" | "practice"
+      learning_path_revision_status: "draft" | "published"
       node_status: "draft" | "published" | "archived"
       review_outcome: "approved" | "rejected"
       revision_status: "draft" | "submitted"
@@ -1090,12 +1075,7 @@ export const Constants = {
     Enums: {
       app_role: ["verifier", "moderator", "curator", "admin"],
       case_status: ["pending", "in_review", "approved", "rejected"],
-      case_type: [
-        "guide_publish",
-        "guide_edit",
-        "learning_path_publish",
-        "learning_path_edit",
-      ],
+      case_type: ["guide_publish", "guide_edit"],
       decision_reason: [
         "hierarchy_issue",
         "factual_error",
@@ -1116,6 +1096,7 @@ export const Constants = {
       ],
       edge_type: ["prerequisite", "related"],
       knowledge_type: ["theory", "practice"],
+      learning_path_revision_status: ["draft", "published"],
       node_status: ["draft", "published", "archived"],
       review_outcome: ["approved", "rejected"],
       revision_status: ["draft", "submitted"],

@@ -31,9 +31,6 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
   // Overwrite a draft revision's metadata (pre-submit only)
   .patch('/:id', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
 
-  // The revision's included nodes
-  .get('/:id/nodes', (c) => c.json({ error: 'Not implemented' }, 501))
-
   // Re-include a skipped topic as a node
   .post('/:id/nodes', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
 
@@ -43,8 +40,8 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
   // Skip a topic: remove it from the included set
   .delete('/:id/nodes/:baseId', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
 
-  // Submit for review: flips to submitted and opens a review_case
-  .post('/:id/submit', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
+  // Publish the draft directly: freeze its edges and point the path at it
+  .post('/:id/publish', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
 
   // Roll back: clone an older revision's targets/nodes into a new draft
   .post('/:id/rollback', requireUser, (c) => c.json({ error: 'Not implemented' }, 501))
