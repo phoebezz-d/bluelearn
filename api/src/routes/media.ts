@@ -83,3 +83,28 @@ export const mediaRouter = new Hono<HonoEnv>()
     return c.json({ message: 'Asset deleted successfully' }, 200)
   })
 
+  // Get location of file from database
+  .get('/:id', async (c) => {
+    const id = c.req.param('id')
+
+    const supabase = c.get('supabase')
+
+    const { data, error: fetchError } = await supabase
+      .from('media_assets')
+      .select('storage_key, uploaded_by, created_at')
+      .eq('id', id)
+      .single()
+
+    if (!data)
+      return c.json({ error: 'Asset not found' }, 404)
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116')
+        return c.json({ error: 'Asset not found' }, 404)
+    
+      console.error('media_assets fetch failed:', fetchError)
+      return c.json({ error: 'Internal server error' }, 500)
+    }
+
+    return c.json({ data }, 200)
+  })
