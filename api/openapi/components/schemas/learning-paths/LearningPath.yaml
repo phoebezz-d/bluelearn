@@ -15,4 +15,6 @@ properties:
     oneOf:
       - $ref: '../common/Uuid.yaml'
       - type: 'null'
-required: [id, slug, title]
+  status:
+    $ref: '../common/NodeStatus.yaml'
+required: [id, slug, title, status]

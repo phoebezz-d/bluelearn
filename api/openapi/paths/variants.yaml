@@ -22,8 +22,8 @@
                 variant:
                   $ref: '../components/schemas/variants/Variant.yaml'
               required: [variant]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
   delete:
     tags: [variants]
     summary: Archive a variant
@@ -39,10 +39,26 @@
               type: object
               properties:
                 variant:
-                  $ref: '../components/schemas/variants/Variant.yaml'
+                  type: object
+                  properties:
+                    id:
+                      $ref: '../components/schemas/common/Uuid.yaml'
+                    slug:
+                      type: [string, 'null']
+                      example: physics-based
+                    status:
+                      $ref: '../components/schemas/common/NodeStatus.yaml'
+                  required: [id, status]
               required: [variant]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+            example:
+              variant:
+                id: 00000000-0000-0000-0000-000000000000
+                slug: physics-based
+                status: archived
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /variants/{id}/vote:
   parameters:
@@ -75,8 +91,12 @@
                 vote:
                   $ref: '../components/schemas/variants/Vote.yaml'
               required: [vote]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
   delete:
     tags: [variants]
     summary: Retract the caller's vote
@@ -84,19 +104,12 @@
     security:
       - bearerAuth: []
     responses:
-      '200':
+      '204':
         description: Vote retracted
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                removed:
-                  type: boolean
-                  example: true
-              required: [removed]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /variants/{id}/revisions:
   parameters:
@@ -107,11 +120,14 @@
         $ref: '../components/schemas/common/Uuid.yaml'
   get:
     tags: [variants]
-    summary: Revision history for this variant
+    summary: Published-version history for this variant
+    description: >
+      The revisions that went live, newest live first. Ordered by approved_at
+      (when each became the current content).
     operationId: listVariantRevisions
     responses:
       '200':
-        description: Revisions, newest first
+        description: Published versions, newest live first
         content:
           application/json:
             schema:
@@ -122,8 +138,8 @@
                   items:
                     $ref: '../components/schemas/common/RevisionListItem.yaml'
               required: [revisions]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
   post:
     tags: [variants]
     summary: Start a new draft revision
@@ -141,8 +157,10 @@
                 revision_id:
                   $ref: '../components/schemas/common/Uuid.yaml'
               required: [revision_id]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /variants/{id}/rollback:
   parameters:
@@ -179,5 +197,9 @@
                 revision_id:
                   $ref: '../components/schemas/common/Uuid.yaml'
               required: [revision_id]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'

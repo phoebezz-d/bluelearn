@@ -21,8 +21,8 @@
                 revision:
                   $ref: '../components/schemas/guide-revisions/GuideRevision.yaml'
               required: [revision]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
   patch:
     tags: [guide-revisions]
     summary: Overwrite a draft revision
@@ -47,8 +47,12 @@
                 revision:
                   $ref: '../components/schemas/guide-revisions/GuideRevision.yaml'
               required: [revision]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /guide-revisions/{id}/submit:
   parameters:
@@ -75,8 +79,10 @@
                 review_case_id:
                   $ref: '../components/schemas/common/Uuid.yaml'
               required: [review_case_id]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /guide-revisions/{id}/diff/{otherId}:
   parameters:
@@ -100,11 +106,6 @@
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                diff:
-                  type: string
-                  description: Rendered diff between the two snapshots.
-              required: [diff]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+              $ref: '../components/schemas/guide-revisions/GuideRevisionDiff.yaml'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'

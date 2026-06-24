@@ -8,8 +8,7 @@ info:
   description: >
     Hono API in front of Supabase/Postgres. The frontend never talks to
     Supabase directly; every call goes through here and carries the user's
-    JWT so Postgres RLS enforces access. Some routes are declared but not
-    yet wired and currently return 501.
+    JWT so Postgres RLS enforces access.
 servers:
   - url: http://localhost:8787
     description: Local dev (pnpm dev:api)
@@ -20,13 +19,13 @@ tags:
   - name: guides
     description: Topics (guide bases) and their canonical content
   - name: variants
-    description: Methods/alternatives under a topic, plus their votes
+    description: Methods/alternatives under a topic
   - name: guide-revisions
     description: Per-guide version history snapshots
   - name: learning-paths
-    description: Curated curricula (/paths)
+    description: Curated curricula
   - name: learning-path-revisions
-    description: Path version history and node editing (/path-revisions)
+    description: Path version history and node editing
   - name: graph
     description: Prerequisite edges and TODO prerequisites
   - name: subjects
@@ -47,6 +46,8 @@ components:
 paths:
   /me:
     $ref: './paths/identity.yaml#/~1me'
+  /me/drafts:
+    $ref: './paths/identity.yaml#/~1me~1drafts'
   /profiles/{username}:
     $ref: './paths/identity.yaml#/~1profiles~1{username}'
 
@@ -56,10 +57,10 @@ paths:
     $ref: './paths/guides.yaml#/~1guides~1{slug}'
   /guides/{slug}/walkthrough:
     $ref: './paths/guides.yaml#/~1guides~1{slug}~1walkthrough'
-  /guides/{slug}/todos:
-    $ref: './paths/guides.yaml#/~1guides~1{slug}~1todos'
   /guides/{slug}/variants:
     $ref: './paths/guides.yaml#/~1guides~1{slug}~1variants'
+  /guides/{slug}/{variantSlug}:
+    $ref: './paths/guides.yaml#/~1guides~1{slug}~1{variantSlug}'
 
   /variants/{id}:
     $ref: './paths/variants.yaml#/~1variants~1{id}'
@@ -86,12 +87,10 @@ paths:
 
   /path-revisions/{id}:
     $ref: './paths/learning-path-revisions.yaml#/~1path-revisions~1{id}'
-  /path-revisions/{id}/nodes:
-    $ref: './paths/learning-path-revisions.yaml#/~1path-revisions~1{id}~1nodes'
   /path-revisions/{id}/nodes/{baseId}:
     $ref: './paths/learning-path-revisions.yaml#/~1path-revisions~1{id}~1nodes~1{baseId}'
-  /path-revisions/{id}/submit:
-    $ref: './paths/learning-path-revisions.yaml#/~1path-revisions~1{id}~1submit'
+  /path-revisions/{id}/publish:
+    $ref: './paths/learning-path-revisions.yaml#/~1path-revisions~1{id}~1publish'
   /path-revisions/{id}/rollback:
     $ref: './paths/learning-path-revisions.yaml#/~1path-revisions~1{id}~1rollback'
   /path-revisions/{id}/diff/{otherId}:

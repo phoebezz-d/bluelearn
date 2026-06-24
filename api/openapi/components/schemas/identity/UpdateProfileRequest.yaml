@@ -7,12 +7,12 @@ properties:
     minLength: 3
     maxLength: 30
     pattern: '^[a-zA-Z0-9_-]+$'
-    example: tony
+    example: username123
   display_name:
     type: [string, 'null']
     maxLength: 50
-    example: Tony Lam
+    example: John Appleseed
   bio:
     type: [string, 'null']
     maxLength: 500
-    example: Learning math
+    example: Coding enthusiast

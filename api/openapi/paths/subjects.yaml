@@ -17,8 +17,6 @@
                   items:
                     $ref: '../components/schemas/subjects/Subject.yaml'
               required: [subjects]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
   post:
     tags: [subjects]
     summary: Create a subject
@@ -42,8 +40,18 @@
                 subject:
                   $ref: '../components/schemas/subjects/Subject.yaml'
               required: [subject]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '409':
+        description: A subject with this name already exists
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common/Error.yaml'
+            example:
+              error: A subject with this name already exists
 
 /subjects/{slug}:
   parameters:
@@ -56,7 +64,7 @@
   get:
     tags: [subjects]
     summary: Get subject metadata
-    description: Subject metadata only; the tagged topic list is a separate call.
+    description: Subject metadata only; the tagged guide list is a separate call.
     operationId: getSubject
     responses:
       '200':
@@ -69,8 +77,8 @@
                 subject:
                   $ref: '../components/schemas/subjects/Subject.yaml'
               required: [subject]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /subjects/{slug}/guides:
   parameters:
@@ -82,12 +90,12 @@
       example: math
   get:
     tags: [subjects]
-    summary: List topics tagged with this subject
-    description: Alphabetical list of topics carrying this subject tag.
+    summary: List guides tagged with this subject
+    description: Alphabetical list of guides carrying this subject tag.
     operationId: listSubjectGuides
     responses:
       '200':
-        description: Tagged topics
+        description: Tagged guides
         content:
           application/json:
             schema:
@@ -98,5 +106,5 @@
                   items:
                     $ref: '../components/schemas/subjects/SubjectGuideListItem.yaml'
               required: [guides]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'

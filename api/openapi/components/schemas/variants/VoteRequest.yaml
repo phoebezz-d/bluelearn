@@ -4,10 +4,10 @@ properties:
   direction:
     type: string
     enum: [up, down]
-    example: up
+    example: down
   reason:
     $ref: './DownvoteReason.yaml'
   note:
     type: [string, 'null']
-    example: Clear and well-paced.
+    example: Forgot to include boiling step
 required: [direction]

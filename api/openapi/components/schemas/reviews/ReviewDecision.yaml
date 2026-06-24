@@ -9,7 +9,7 @@ properties:
     example: approved
   justification:
     type: [string, 'null']
-    example: Looks good
+    example: All the information is correct.
   reasons:
     type: array
     description: Rubric reasons; present (and non-empty) only on a reject.

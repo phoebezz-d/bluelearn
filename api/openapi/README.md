@@ -27,8 +27,6 @@ components/
   responses/_shared.yaml  # reusable error responses
 ```
 
-Routes that exist in the routers but aren't wired yet document a `501` response.
-
 ## View
 
 `index.html` is a Swagger UI page that loads `openapi.yaml`.

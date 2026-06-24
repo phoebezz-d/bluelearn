@@ -5,7 +5,7 @@ properties:
   direction:
     type: string
     enum: [up, down]
-    example: up
+    example: down
   reason:
     $ref: './DownvoteReason.yaml'
   note:

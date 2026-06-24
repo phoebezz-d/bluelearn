@@ -2,40 +2,41 @@
 /guides:
   get:
     tags: [guides]
-    summary: List published topics
-    description: Published guide bases, alphabetical. RLS hides drafts from non-authors.
+    summary: List published guides
+    description: Published guide bases, alphabetical.
     operationId: listGuides
     responses:
       '200':
-        description: Published topics
+        description: Published guides
         content:
           application/json:
             schema:
               type: object
               properties:
-                topics:
+                guides:
                   type: array
                   items:
-                    $ref: '../components/schemas/guides/TopicListItem.yaml'
-              required: [topics]
+                    $ref: '../components/schemas/guides/GuideListItem.yaml'
+              required: [guides]
   post:
     tags: [guides]
-    summary: Create a topic
+    summary: Create a guide
     description: >
-      Creates guide_base + first guide + draft revision in one transaction
-      (create_topic RPC). Returns the draft revision id for routing to the editor.
-    operationId: createTopic
+      Creates an empty draft guide_base + first guide + draft revision. The body
+      is optional; content is filled in the editor. Returns the draft revision id
+      for routing to the editor.
+    operationId: createGuide
     security:
       - bearerAuth: []
     requestBody:
-      required: true
+      required: false
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/guides/CreateTopicRequest.yaml'
+            $ref: '../components/schemas/guides/CreateGuideRequest.yaml'
     responses:
       '201':
-        description: Created; draft revision id + frozen slug
+        description: Created; draft revision id
         content:
           application/json:
             schema:
@@ -43,16 +44,11 @@
               properties:
                 revision_id:
                   $ref: '../components/schemas/common/Uuid.yaml'
-                slug:
-                  type: string
-                  example: calculus
-              required: [revision_id, slug]
+              required: [revision_id]
       '400':
         $ref: '../components/responses/_shared.yaml#/BadRequest'
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
-      '409':
-        $ref: '../components/responses/_shared.yaml#/Conflict'
 
 /guides/{slug}:
   parameters:
@@ -64,42 +60,42 @@
       example: calculus
   get:
     tags: [guides]
-    summary: Get a topic by slug
-    description: Canonical content of the topic plus its subject tags.
-    operationId: getTopic
+    summary: Get a guide by slug
+    description: Canonical content of the guide plus its subject tags.
+    operationId: getGuide
     responses:
       '200':
-        description: Topic content + subject tags
+        description: Guide content + subject tags
         content:
           application/json:
             schema:
               type: object
               properties:
-                topic:
-                  $ref: '../components/schemas/guides/Topic.yaml'
+                guide:
+                  $ref: '../components/schemas/guides/Guide.yaml'
                 subjects:
                   type: array
                   items:
                     $ref: '../components/schemas/subjects/SubjectTag.yaml'
-              required: [topic, subjects]
+              required: [guide, subjects]
       '404':
         $ref: '../components/responses/_shared.yaml#/NotFound'
   delete:
     tags: [guides]
-    summary: Archive a topic
+    summary: Archive a guide
     description: Moderator/admin only (RLS). A non-permitted caller matches zero rows (404).
-    operationId: archiveTopic
+    operationId: archiveGuide
     security:
       - bearerAuth: []
     responses:
       '200':
-        description: The archived topic
+        description: The archived guide
         content:
           application/json:
             schema:
               type: object
               properties:
-                topic:
+                guide:
                   type: object
                   properties:
                     id:
@@ -110,7 +106,12 @@
                     status:
                       $ref: '../components/schemas/common/NodeStatus.yaml'
                   required: [id, slug, status]
-              required: [topic]
+              required: [guide]
+            example:
+              guide:
+                id: 00000000-0000-0000-0000-000000000000
+                slug: calculus
+                status: archived
       '401':
         $ref: '../components/responses/_shared.yaml#/Unauthorized'
       '404':
@@ -126,7 +127,7 @@
       example: calculus
   get:
     tags: [guides]
-    summary: Topic walkthrough (transitive prerequisite DAG)
+    summary: Guide walkthrough (transitive prerequisite DAG)
     description: >
       Materializes the target's transitive prerequisite closure with
       longest-path depths, plus the prerequisite edges among the nodes.
@@ -138,48 +139,8 @@
           application/json:
             schema:
               $ref: '../components/schemas/guides/Walkthrough.yaml'
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
-
-/guides/{slug}/todos:
-  parameters:
-    - name: slug
-      in: path
-      required: true
-      schema:
-        type: string
-      example: calculus
-  post:
-    tags: [guides]
-    summary: Declare a TODO prerequisite
-    description: Declares a missing prerequisite topic that has no guide base yet.
-    operationId: declareTodo
-    security:
-      - bearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: Trigonometry
-            required: [title]
-    responses:
-      '201':
-        description: The created TODO prerequisite
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                todo:
-                  $ref: '../components/schemas/guides/Todo.yaml'
-              required: [todo]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /guides/{slug}/variants:
   parameters:
@@ -191,12 +152,12 @@
       example: calculus
   get:
     tags: [guides]
-    summary: List variants under a topic
-    description: The methods (practice topic) or alternatives (theory topic) under this topic.
-    operationId: listTopicVariants
+    summary: List variants under a guide
+    description: The methods (practice guide) or alternatives (theory guide) under this guide.
+    operationId: listGuideVariants
     responses:
       '200':
-        description: Variants under the topic
+        description: Variants under the guide
         content:
           application/json:
             schema:
@@ -207,15 +168,15 @@
                   items:
                     $ref: '../components/schemas/variants/VariantListItem.yaml'
               required: [variants]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
   post:
     tags: [guides]
-    summary: Add a variant under a topic
+    summary: Add a variant under a guide
     description: >
-      Creates a draft guide + first revision under the topic (create_variant
+      Creates a draft guide + first revision under the guide (create_variant
       RPC). Returns the draft revision id.
-    operationId: addTopicVariant
+    operationId: addGuideVariant
     security:
       - bearerAuth: []
     requestBody:
@@ -235,5 +196,47 @@
                 revision_id:
                   $ref: '../components/schemas/common/Uuid.yaml'
               required: [revision_id]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
+
+/guides/{slug}/{variantSlug}:
+  parameters:
+    - name: slug
+      in: path
+      required: true
+      description: The parent guide's base slug.
+      schema:
+        type: string
+      example: calculus
+    - name: variantSlug
+      in: path
+      required: true
+      description: The variant's slug, unique within the parent guide.
+      schema:
+        type: string
+      example: physics-based
+  get:
+    tags: [guides]
+    summary: Get a variant by its slug
+    description: >
+      Resolves the base + variant slug pair to the variant and returns it with its id, so
+      the client can switch to the id-based /variants/{id} routes for any
+      actions. Drafts have no slug and are addressed by id instead.
+    operationId: getVariantBySlug
+    responses:
+      '200':
+        description: The variant detail
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variant:
+                  $ref: '../components/schemas/variants/Variant.yaml'
+              required: [variant]
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'

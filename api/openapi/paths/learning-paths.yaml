@@ -17,14 +17,12 @@
                   items:
                     $ref: '../components/schemas/learning-paths/LearningPathListItem.yaml'
               required: [learning_paths]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
   post:
     tags: [learning-paths]
     summary: Create a draft path
     description: >
       Creates the shell + revision 1, seeding the closure of the target
-      topics as the initial node set. Returns the draft revision id for routing
+      guides as the initial node set. Returns the draft revision id for routing
       to the editor.
     operationId: createLearningPath
     security:
@@ -46,8 +44,12 @@
                 revision_id:
                   $ref: '../components/schemas/common/Uuid.yaml'
               required: [revision_id]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
 
 /paths/{slug}:
   parameters:
@@ -75,8 +77,8 @@
                 snapshot:
                   $ref: '../components/schemas/learning-paths/PathSnapshot.yaml'
               required: [path, snapshot]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
   delete:
     tags: [learning-paths]
     summary: Archive a path
@@ -92,10 +94,28 @@
               type: object
               properties:
                 path:
-                  $ref: '../components/schemas/learning-paths/LearningPath.yaml'
+                  type: object
+                  properties:
+                    id:
+                      $ref: '../components/schemas/common/Uuid.yaml'
+                    slug:
+                      type: string
+                      example: backend-engineer
+                    status:
+                      $ref: '../components/schemas/common/NodeStatus.yaml'
+                  required: [id, slug, status]
               required: [path]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+            example:
+              path:
+                id: 00000000-0000-0000-0000-000000000000
+                slug: backend-engineer
+                status: archived
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /paths/{slug}/revisions:
   parameters:
@@ -120,10 +140,10 @@
                 revisions:
                   type: array
                   items:
-                    $ref: '../components/schemas/common/RevisionListItem.yaml'
+                    $ref: '../components/schemas/learning-path-revisions/LearningPathRevisionListItem.yaml'
               required: [revisions]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
   post:
     tags: [learning-paths]
     summary: Start a new draft revision
@@ -141,5 +161,9 @@
                 revision_id:
                   $ref: '../components/schemas/common/Uuid.yaml'
               required: [revision_id]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/_shared.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'

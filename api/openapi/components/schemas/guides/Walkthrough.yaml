@@ -1,5 +1,5 @@
 type: object
-description: A topic's transitive prerequisite DAG, RLS-filtered.
+description: A guide's transitive prerequisite DAG, RLS-filtered.
 properties:
   nodes:
     type: array

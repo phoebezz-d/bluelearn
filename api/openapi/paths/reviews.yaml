@@ -20,8 +20,8 @@
                   items:
                     $ref: '../components/schemas/reviews/ReviewCaseListItem.yaml'
               required: [cases]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
 
 /reviews/cases:
   get:
@@ -41,8 +41,6 @@
                   items:
                     $ref: '../components/schemas/reviews/ReviewCaseListItem.yaml'
               required: [cases]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
 
 /reviews/cases/{id}:
   parameters:
@@ -74,8 +72,8 @@
                   items:
                     $ref: '../components/schemas/reviews/ReviewDecision.yaml'
               required: [case, panel, decisions]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
 
 /reviews/cases/{id}/decisions:
   parameters:
@@ -108,5 +106,17 @@
                 decision:
                   $ref: '../components/schemas/reviews/ReviewDecision.yaml'
               required: [decision]
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/_shared.yaml#/NotFound'
+      '409':
+        description: The caller's seat has already cast a decision on this case
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common/Error.yaml'
+            example:
+              error: You have already cast a decision on this case

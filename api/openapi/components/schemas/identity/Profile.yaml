@@ -5,13 +5,13 @@ properties:
     $ref: '../common/Uuid.yaml'
   username:
     type: string
-    example: tony
+    example: username123
   display_name:
     type: [string, 'null']
-    example: Tony Lam
+    example: John Appleseed 
   bio:
     type: [string, 'null']
-    example: Learning math
+    example: Coding enthusiast
   is_suspended:
     type: boolean
     example: false

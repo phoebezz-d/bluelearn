@@ -10,9 +10,6 @@ properties:
     example: physics-based
   status:
     $ref: '../common/NodeStatus.yaml'
-  is_canonical:
-    type: boolean
-    example: false
   current:
     type: [object, 'null']
     description: The live revision content.

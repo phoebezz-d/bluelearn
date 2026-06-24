@@ -10,7 +10,7 @@ oneOf:
         const: approved
       justification:
         type: string
-        example: Looks good
+        example: All the information is correct.
     required: [decision, justification]
   - title: Reject
     type: object

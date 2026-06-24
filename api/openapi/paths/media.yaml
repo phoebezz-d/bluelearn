@@ -24,5 +24,7 @@
           application/json:
             schema:
               $ref: '../components/schemas/media/MediaUploadResponse.yaml'
-      '501':
-        $ref: '../components/responses/_shared.yaml#/NotImplemented'
+      '400':
+        $ref: '../components/responses/_shared.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/_shared.yaml#/Unauthorized'

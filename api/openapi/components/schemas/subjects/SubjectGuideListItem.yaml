@@ -1,5 +1,5 @@
 type: object
-description: A topic carrying this subject tag.
+description: A guide carrying this subject tag.
 properties:
   id:
     $ref: '../common/Uuid.yaml'
