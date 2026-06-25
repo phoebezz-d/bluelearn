@@ -103,7 +103,7 @@ export const mediaRouter = new Hono<HonoEnv>()
   })
 
   // Get file info from database
-  .get('/:id', async (c) => {
+  .get('/:id/info', async (c) => {
     const id = c.req.param('id')
 
     const supabase = c.get('supabase')
@@ -129,7 +129,7 @@ export const mediaRouter = new Hono<HonoEnv>()
   })
 
   // Update a file in object storage. Keep old file in database as part of revision history
-  .patch('/:id/update', requireUser, async (c) => {
+  .patch('/:id', requireUser, async (c) => {
     const id     = c.req.param('id')
     const userId = c.get('user').id
     const body = await c.req.formData()
