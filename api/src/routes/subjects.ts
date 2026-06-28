@@ -33,5 +33,5 @@ export const subjectsRouter = new Hono<HonoEnv>()
   // Alphabetical list of guides carrying this subject tag
   .get("/:slug/guides", async (c) => {
     const guides = await listSubjectGuides(c.get("supabase"), c.req.param("slug"))
-    return c.json({ guide_bases: guides }, 200)
+    return c.json({ guides }, 200)
   })

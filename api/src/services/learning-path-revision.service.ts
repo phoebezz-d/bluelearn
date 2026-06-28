@@ -23,7 +23,10 @@ export async function getRevisionSnapshot(
     .select(NODE_COLS)
     .eq("revision_id", revisionId)
 
-  if (nodeError) throw new ServiceError(nodeError.message, 500)
+  if (nodeError) {
+    console.error(nodeError)
+    throw new ServiceError("Failed to load revision", 500)
+  }
 
   const baseIds = (nodeRows ?? []).map((n) => n.guide_base_id)
   const baseMeta = new Map<string, { slug: string | null; title: string | null }>()
@@ -34,7 +37,10 @@ export async function getRevisionSnapshot(
       .select("id, slug, title")
       .in("id", baseIds)
 
-    if (baseError) throw new ServiceError(baseError.message, 500)
+    if (baseError) {
+      console.error(baseError)
+      throw new ServiceError("Failed to load revision", 500)
+    }
     for (const b of bases ?? []) baseMeta.set(b.id, { slug: b.slug, title: b.title })
   }
 
@@ -69,8 +75,14 @@ export async function getRevisionSnapshot(
       : null,
   ])
 
-  if (projected.error) throw new ServiceError(projected.error.message, 500)
-  if (raw?.error) throw new ServiceError(raw.error.message, 500)
+  if (projected.error) {
+    console.error(projected.error)
+    throw new ServiceError("Failed to load revision edges", 500)
+  }
+  if (raw?.error) {
+    console.error(raw.error)
+    throw new ServiceError("Failed to load revision edges", 500)
+  }
 
   const toEdge = (e: { from_guide_base_id: string; to_guide_base_id: string }) => ({
     from_id: e.from_guide_base_id,
@@ -90,7 +102,10 @@ export async function getLearningPathRevision(supabase: DB, revisionId: string) 
     .eq("id", revisionId)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load revision", 500)
+  }
   if (!revision) throw new ServiceError("Revision not found", 404)
 
   const snapshot = await getRevisionSnapshot(
@@ -113,7 +128,7 @@ export async function updateLearningPathRevision(
     .eq("id", revisionId)
     .select(REVISION_META)
 
-  if (error) throw new ServiceError(error.message, 400)
+  if (error) throw new ServiceError("Unable to update revision", 400)
   if (!data || data.length === 0) {
     throw new ServiceError("Revision not found or not an editable draft", 404)
   }
@@ -135,7 +150,7 @@ export async function updatePathNode(
     .eq("guide_base_id", baseId)
     .select(NODE_COLS)
 
-  if (error) throw new ServiceError(error.message, 400)
+  if (error) throw new ServiceError("Unable to update node", 400)
   if (!data || data.length === 0) {
     throw new ServiceError("Node not found or not editable", 404)
   }
@@ -147,7 +162,10 @@ export async function updatePathNode(
     .eq("id", node.guide_base_id)
     .maybeSingle()
 
-  if (baseError) throw new ServiceError(baseError.message, 500)
+  if (baseError) {
+    console.error(baseError)
+    throw new ServiceError("Failed to load guide", 500)
+  }
 
   return {
     node: {
@@ -172,8 +190,8 @@ export async function publishLearningPathRevision(supabase: DB, revisionId: stri
 
   if (error) {
     if (error.code === "P0002") throw new ServiceError("Revision not found", 404)
-    if (error.code === "42501") throw new ServiceError(error.message, 403)
-    throw new ServiceError(error.message, 400)
+    if (error.code === "42501") throw new ServiceError("Not permitted to publish this revision", 403)
+    throw new ServiceError("Unable to publish revision", 400)
   }
   return { slug }
 }
@@ -194,8 +212,8 @@ export async function rollbackLearningPathRevision(
 
   if (error) {
     if (error.code === "P0002") throw new ServiceError("Revision not found for this path", 404)
-    if (error.code === "42501") throw new ServiceError(error.message, 403)
-    throw new ServiceError(error.message, 400)
+    if (error.code === "42501") throw new ServiceError("Not permitted to roll back this revision", 403)
+    throw new ServiceError("Unable to roll back revision", 400)
   }
 
   return { revision_id }

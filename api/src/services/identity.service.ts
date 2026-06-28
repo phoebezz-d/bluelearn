@@ -78,8 +78,14 @@ export async function getMyDrafts(
       .order("updated_at", { ascending: false }),
   ])
 
-  if (guides.error) throw new ServiceError(guides.error.message, 500)
-  if (paths.error) throw new ServiceError(paths.error.message, 500)
+  if (guides.error) {
+    console.error(guides.error)
+    throw new ServiceError("Failed to load drafts", 500)
+  }
+  if (paths.error) {
+    console.error(paths.error)
+    throw new ServiceError("Failed to load drafts", 500)
+  }
 
   return {
     guide_drafts: guides.data.map((r) => ({
@@ -113,7 +119,8 @@ export async function updateMyProfile(supabase: DB, userId: string, updates: Upd
   if (error) {
     // unique_violation: username (or its case-insensitive form) is taken.
     if (error.code === "23505") throw new ServiceError("Username already taken", 409)
-    throw new ServiceError(error.message, 500)
+    console.error(error)
+    throw new ServiceError("Failed to update profile", 500)
   }
 
   const roles = await fetchRoles(supabase, userId)
@@ -130,7 +137,10 @@ export async function getPublicProfile(supabase: DB, service: DB, username: stri
     .eq("is_suspended", false)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load profile", 500)
+  }
   if (!profile) throw new ServiceError("Profile not found", 404)
 
   const roles = await fetchPublicBadges(service, profile.id)

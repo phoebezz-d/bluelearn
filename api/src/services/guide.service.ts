@@ -21,7 +21,7 @@ type Walkthrough = {
 // A guide's title/summary/body live on the canonical guide's current
 // revision, not on the base. These embeds walk guide_bases -> canonical
 // guide -> its live revision.
-const CANONICAL_SUMMARY = `
+export const CANONICAL_SUMMARY = `
   canonical:guides!guide_bases_canonical_guide_id_fkey(
     current:guide_revisions!guides_current_revision_id_fkey(
       summary
@@ -53,7 +53,10 @@ async function resolveBaseId(supabase: DB, rawSlug: string) {
     .eq("slug", rawSlug.toLowerCase())
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load guide", 500)
+  }
   if (!data) throw new ServiceError("Guide not found", 404)
   return data.id
 }
@@ -66,7 +69,10 @@ export async function listPublishedGuides(supabase: DB) {
     .eq("status", "published")
     .order("title")
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load guides", 500)
+  }
 
   return (data ?? []).map(({ canonical, ...base }) => ({
     ...base,
@@ -88,7 +94,10 @@ export async function createGuide(supabase: DB, input: CreateGuideInput) {
     p_body: body ?? undefined,
   })
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to create guide", 500)
+  }
 
   return { revision_id }
 }
@@ -104,7 +113,10 @@ export async function getGuideBySlug(supabase: DB, rawSlug: string) {
     .eq("slug", slug)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load guide", 500)
+  }
   if (!guide) throw new ServiceError("Guide not found", 404)
 
   const { data: tagRows, error: tagError } = await supabase
@@ -112,7 +124,10 @@ export async function getGuideBySlug(supabase: DB, rawSlug: string) {
     .select("subjects(id, slug, name)")
     .eq("guide_base_id", guide.id)
 
-  if (tagError) throw new ServiceError(tagError.message, 500)
+  if (tagError) {
+    console.error(tagError)
+    throw new ServiceError("Failed to load guide subjects", 500)
+  }
   const subjects = (tagRows ?? []).map((r) => r.subjects).filter((s) => s !== null)
 
   return { guide, subjects }
@@ -129,7 +144,10 @@ export async function archiveGuide(supabase: DB, rawSlug: string) {
     .eq("slug", slug)
     .select("id, slug, status")
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to archive guide", 500)
+  }
   if (!data || data.length === 0) {
     throw new ServiceError("Guide not found or not permitted", 404)
   }
@@ -145,7 +163,10 @@ export async function getWalkthrough(supabase: DB, rawSlug: string) {
     p_guide_base_id: baseId,
   })
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to compute walkthrough", 500)
+  }
   return data as unknown as Walkthrough
 }
 
@@ -163,7 +184,10 @@ export async function listGuideVariants(supabase: DB, rawSlug: string) {
     .eq("status", "published")
     .order("slug")
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load variants", 500)
+  }
 
   return (data ?? []).map(({ current, ...variant }) => ({
     ...variant,
@@ -189,7 +213,10 @@ export async function addGuideVariant(
     p_body: input.body ?? undefined,
   })
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to add variant", 500)
+  }
   return { revision_id }
 }
 
@@ -212,7 +239,10 @@ export async function getVariantBySlug(
     .eq("slug", rawVariantSlug.toLowerCase())
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load variant", 500)
+  }
   if (!variant) throw new ServiceError("Variant not found", 404)
 
   const { data: tally, error: tallyError } = await supabase
@@ -221,7 +251,10 @@ export async function getVariantBySlug(
     .eq("guide_id", variant.id)
     .maybeSingle()
 
-  if (tallyError) throw new ServiceError(tallyError.message, 500)
+  if (tallyError) {
+    console.error(tallyError)
+    throw new ServiceError("Failed to load vote tally", 500)
+  }
 
   return {
     variant: {

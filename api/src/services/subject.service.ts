@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "../database.types"
 import { ServiceError } from "../lib/service-error"
 import { slugify } from "../lib/slug"
+import { CANONICAL_SUMMARY } from "./guide.service"
 
 type DB = SupabaseClient<Database>
 
@@ -10,7 +11,10 @@ export async function listSubjects(supabase: DB) {
     .from("subjects")
     .select("id, slug, name")
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load subjects", 500)
+  }
   return data ?? []
 }
 
@@ -26,9 +30,10 @@ export async function createSubject(supabase: DB, userId: string, name: string) 
 
   if (error) {
     if (error.code === "23505") {
-      throw new ServiceError("Error: This subject name is a duplicate of an existing subject.", 409)
+      throw new ServiceError("Subject already exists", 409)
     }
-    throw new ServiceError(error.message, 500)
+    console.error(error)
+    throw new ServiceError("Failed to create subject", 500)
   }
 
   return data
@@ -37,11 +42,14 @@ export async function createSubject(supabase: DB, userId: string, name: string) 
 export async function getSubjectBySlug(supabase: DB, rawSlug: string) {
   const { data, error } = await supabase
     .from("subjects")
-    .select("*")
+    .select("id, slug, name")
     .eq("slug", rawSlug)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load subject", 500)
+  }
   if (!data) throw new ServiceError("Subject not found.", 404)
 
   return data
@@ -54,26 +62,25 @@ export async function listSubjectGuides(supabase: DB, rawSlug: string) {
     .eq("slug", rawSlug)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load subject", 500)
+  }
   if (!subject) throw new ServiceError("Subject not found", 404)
 
-  const { data: guideSubjects, error: guideError } = await supabase
-    .from("guide_subjects")
-    .select("guide_base_id")
-    .eq("subject_id", subject.id)
-
-  if (guideError) throw new ServiceError(guideError.message, 500)
-
-  const ids = guideSubjects.map((r) => r.guide_base_id)
-  if (ids.length === 0) return []
-
-  const { data: guideBases, error: baseError } = await supabase
+  const { data, error: guideError } = await supabase
     .from("guide_bases")
-    .select("slug, title, knowledge_type")
-    .in("id", ids)
+    .select(`id, slug, title, guide_subjects!inner(subject_id), ${CANONICAL_SUMMARY}`)
+    .eq("guide_subjects.subject_id", subject.id)
     .order("title")
 
-  if (baseError) throw new ServiceError(baseError.message, 500)
+  if (guideError) {
+    console.error(guideError)
+    throw new ServiceError("Failed to load subject guides", 500)
+  }
 
-  return guideBases ?? []
+  return (data ?? []).map(({ canonical, guide_subjects: _tags, ...base }) => ({
+    ...base,
+    summary: canonical?.current?.summary ?? null,
+  }))
 }

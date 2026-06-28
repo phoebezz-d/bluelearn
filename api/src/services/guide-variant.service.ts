@@ -21,7 +21,10 @@ async function requireVariant(supabase: DB, id: string) {
     .eq("id", id)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load variant", 500)
+  }
   if (!data) throw new ServiceError("Variant not found", 404)
   return data
 }
@@ -34,7 +37,10 @@ async function withVotes<T extends { id: string }>(supabase: DB, variant: T) {
     .eq("guide_id", variant.id)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load vote tally", 500)
+  }
   return {
     ...variant,
     votes: { up: tally?.upvotes ?? 0, down: tally?.downvotes ?? 0 },
@@ -49,7 +55,10 @@ export async function getVariant(supabase: DB, id: string) {
     .eq("id", id)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load variant", 500)
+  }
   if (!variant) throw new ServiceError("Variant not found", 404)
 
   return { variant: await withVotes(supabase, variant) }
@@ -64,7 +73,10 @@ export async function archiveVariant(supabase: DB, id: string) {
     .eq("id", id)
     .select("id, slug, status")
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to archive variant", 500)
+  }
   if (!data || data.length === 0) {
     throw new ServiceError("Variant not found or not permitted", 404)
   }
@@ -96,7 +108,7 @@ export async function castVote(
     .select("guide_id, direction, reason, note, updated_at")
     .single()
 
-  if (error) throw new ServiceError(error.message, 400)
+  if (error) throw new ServiceError("Unable to cast vote", 400)
   return { vote: data }
 }
 
@@ -108,7 +120,10 @@ export async function retractVote(supabase: DB, voterId: string, id: string) {
     .eq("voter_id", voterId)
     .eq("guide_id", id)
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to retract vote", 500)
+  }
 }
 
 // The variant's published-version timeline: only revisions that went live,
@@ -125,7 +140,10 @@ export async function listVariantRevisions(supabase: DB, id: string) {
     .not("approved_at", "is", null)
     .order("approved_at", { ascending: false })
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load variant revisions", 500)
+  }
 
   return (data ?? []).map((rev) => ({
     id: rev.id,
@@ -153,7 +171,10 @@ export async function createVariantRevision(supabase: DB, authorId: string, id: 
     .eq("id", variant.current_revision_id)
     .maybeSingle()
 
-  if (sourceError) throw new ServiceError(sourceError.message, 500)
+  if (sourceError) {
+    console.error(sourceError)
+    throw new ServiceError("Failed to load variant", 500)
+  }
 
   const { data, error } = await supabase
     .from("guide_revisions")
@@ -168,7 +189,10 @@ export async function createVariantRevision(supabase: DB, authorId: string, id: 
     .select("id")
     .single()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to create revision", 500)
+  }
   return { revision_id: data.id }
 }
 
@@ -189,7 +213,10 @@ export async function rollbackVariant(
     .eq("guide_id", id)
     .maybeSingle()
 
-  if (sourceError) throw new ServiceError(sourceError.message, 500)
+  if (sourceError) {
+    console.error(sourceError)
+    throw new ServiceError("Failed to load revision", 500)
+  }
   if (!source) throw new ServiceError("Revision not found for this variant", 404)
 
   const { data, error } = await supabase
@@ -206,6 +233,9 @@ export async function rollbackVariant(
     .select("id")
     .single()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to create revision", 500)
+  }
   return { revision_id: data.id }
 }

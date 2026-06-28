@@ -24,7 +24,10 @@ async function resolvePath(supabase: DB, rawSlug: string) {
     .eq("slug", rawSlug.toLowerCase())
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load learning path", 500)
+  }
   if (!data) throw new ServiceError("Learning path not found", 404)
   return data
 }
@@ -37,7 +40,10 @@ export async function listPublishedLearningPaths(supabase: DB) {
     .eq("status", "published")
     .order("created_at", { ascending: false })
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load learning paths", 500)
+  }
 
   return (data ?? []).map(({ current, ...path }) => ({
     ...path,
@@ -57,7 +63,10 @@ export async function createLearningPath(supabase: DB, input: CreateLearningPath
     p_summary: input.summary ?? undefined,
   })
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to create learning path", 500)
+  }
   return { revision_id }
 }
 
@@ -73,7 +82,10 @@ export async function getLearningPathBySlug(supabase: DB, rawSlug: string) {
     .eq("slug", slug)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load learning path", 500)
+  }
   if (!row || !row.current_revision_id) throw new ServiceError("Learning path not found", 404)
 
   const { current, ...base } = row
@@ -96,7 +108,10 @@ export async function archiveLearningPath(supabase: DB, rawSlug: string) {
     .eq("slug", rawSlug.toLowerCase())
     .select("id, slug, status")
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to archive learning path", 500)
+  }
   if (!data || data.length === 0) {
     throw new ServiceError("Learning path not found or not permitted", 404)
   }
@@ -114,6 +129,9 @@ export async function listLearningPathRevisions(supabase: DB, rawSlug: string) {
     .eq("learning_path_id", id)
     .order("created_at", { ascending: false })
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load revisions", 500)
+  }
   return data ?? []
 }

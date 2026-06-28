@@ -18,7 +18,10 @@ export async function getRevision(supabase: DB, id: string) {
     .eq("id", id)
     .maybeSingle()
 
-  if (error) throw new ServiceError(error.message, 500)
+  if (error) {
+    console.error(error)
+    throw new ServiceError("Failed to load revision", 500)
+  }
   if (!revision) throw new ServiceError("Revision not found", 404)
 
   return { revision }
@@ -41,7 +44,7 @@ export async function updateRevision(supabase: DB, id: string, input: UpdateRevi
     .eq("id", id)
     .select(REVISION_DETAIL)
 
-  if (error) throw new ServiceError(error.message, 400)
+  if (error) throw new ServiceError("Unable to update revision", 400)
   if (!data || data.length === 0) {
     throw new ServiceError("Revision not found or not an editable draft", 404)
   }
@@ -60,7 +63,7 @@ export async function submitRevision(supabase: DB, id: string) {
     if (error.code === "P0002") {
       throw new ServiceError("Revision not found or not an editable draft", 404)
     }
-    throw new ServiceError(error.message, 400)
+    throw new ServiceError("Unable to submit revision", 400)
   }
 
   return { review_case_id }
