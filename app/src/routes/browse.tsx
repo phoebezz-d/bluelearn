@@ -12,6 +12,7 @@ import { hydratePaths } from "@/lib/getData";
 
 import paths from "@/data/paths.json"
 import guides from "@/data/guides.json"
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 
 
 export const Route = createFileRoute("/browse")({
@@ -24,6 +25,8 @@ function RouteComponent() {
   const allGuides = hydratedPaths.flatMap((p) => 
     p.levels.map((l) => l.guide)
   );
+
+  const sectionHeadingCommonClassNames = "font-mono text-[13px] uppercase tracking-[0.08em] text-muted-foreground ml-1";
 
   return (
     <div className="mx-auto max-w-[1280px] border-x bg-background">
@@ -60,33 +63,37 @@ function RouteComponent() {
 
       {/* Paths */}
       <section className="px-8 py-10 lg:px-16">
-        <div className="mb-4 flex items-end justify-between">
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-            Learning Paths ({paths.length})
-          </p>
-        </div>
+        <CollapsibleSection 
+          title={
+            <h2 className={`${sectionHeadingCommonClassNames}`}>
+              Learning Paths ({paths.length})
+            </h2>
+          }
+          defaultOpen={true}
+        >
+          <Separator className="mb-8 bg-border" />
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+            {hydratedPaths.map((path: HydratedPath) => (
+              <PathCard key={path.slug} path={path} />
+            ))}
+          </div>
+        </CollapsibleSection>
 
-        <Separator className="mb-8 bg-border" />
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-          {hydratedPaths.map((path: HydratedPath) => (
-            <PathCard key={path.slug} path={path} />
-          ))}
-        </div>
-
-        {/* Guides */}
-        <div className="pt-8 mb-4 flex items-end justify-between">
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-            Guides ({allGuides.length})
-          </p>
-        </div>
-
-        <Separator className="mb-8 bg-border" />
-
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {/* {allGuides.map((guide, index) => (
-            <GuideCard key={index} guide={guide} />
-          ))} */}
-        </div>
+        <CollapsibleSection
+          title={
+            <h2 className={`${sectionHeadingCommonClassNames}`}>
+              Guides ({allGuides.length})
+            </h2>
+          }
+          defaultOpen={true}
+        >
+          <Separator className="mb-8 bg-border" />
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {/* {allGuides.map((guide, index) => (
+              <GuideCard key={index} guide={guide} />
+            ))} */}
+          </div>
+        </CollapsibleSection>
       </section>
     </div>
   );
