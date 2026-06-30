@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
-function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
+function PaginationBase({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
       role="navigation"
@@ -152,7 +152,7 @@ function PaginationEllipsis({
 }
 
 export {
-  Pagination,
+  PaginationBase,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,

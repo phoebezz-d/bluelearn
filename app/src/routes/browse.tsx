@@ -13,7 +13,7 @@ import { hydratePaths } from "@/lib/getData";
 import paths from "@/data/paths.json"
 import guides from "@/data/guides.json"
 import { CollapsibleSection } from "@/components/CollapsibleSection";
-import { PaginationWrapper } from "@/components/PaginationWrapper";
+import { Pagination } from "@/components/PaginationWrapper";
 
 
 export const Route = createFileRoute("/browse")({
@@ -79,7 +79,7 @@ function RouteComponent() {
             ))}
           </div>
           <div className="mt-8 mb-4">
-            <PaginationWrapper
+            <Pagination
               activePageNo={1}
               onPageSelect={() => {}}
               toFirst={() => {}}
@@ -106,7 +106,7 @@ function RouteComponent() {
             ))} */}
           </div>
           <div className="mt-8 mb-4">
-            <PaginationWrapper
+            <Pagination
               activePageNo={1}
               onPageSelect={() => {}}
               toFirst={() => {}}

@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import {
-  Pagination,
+  PaginationBase,
   PaginationContent,
   PaginationFirst,
   PaginationItem,
@@ -8,7 +8,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@/components/ui/pagination-base";
 
 export type PaginationWrapperPropTypes = {
   activePageNo: number,
@@ -19,7 +19,7 @@ export type PaginationWrapperPropTypes = {
   toLast: VoidFunction,
   totalPages: number,
 }
-export const PaginationWrapper = ({
+export const Pagination = ({
   activePageNo,
   onPageSelect,
   toFirst,
@@ -29,7 +29,7 @@ export const PaginationWrapper = ({
   totalPages,
 }: PaginationWrapperPropTypes): JSX.Element => {
   return (
-    <Pagination>
+    <PaginationBase>
       <PaginationContent>
         <PaginationItem>
           <PaginationFirst onClick={toFirst} />
@@ -51,7 +51,7 @@ export const PaginationWrapper = ({
           <PaginationLast onClick={toLast} />
         </PaginationItem>
       </PaginationContent>
-    </Pagination>
+    </PaginationBase>
   )
 }
 
