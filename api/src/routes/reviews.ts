@@ -25,23 +25,23 @@ export const reviewsRouter = new Hono<HonoEnv>()
 
   // Case detail with panel, members, decisions, and linked revision
   .get('/cases/:id', async (c) => {
-    const reviewCase = await getReviewCase(c.get('supabase'), c.req.param('id'))
-    return c.json({ case: reviewCase }, 200)
+    const result = await getReviewCase(c.get('supabase'), c.req.param('id'))
+    return c.json(result, 200)
   })
 
-  // Cast a panel vote with written justification
+  // Cast or update a panel vote with written justification (+ rubric reasons if rejected)
   .post(
     '/cases/:id/decisions',
     requireUser,
     zValidator('json', createDecisionSchema),
     async (c) => {
-      const { decision, notes } = c.req.valid('json')
+      const body = c.req.valid('json')
       const result = await castDecision(
         c.get('supabase'),
         c.get('user').id,
         c.req.param('id'),
-        { decision, notes },
+        body,
       )
-      return c.json({ decision: result }, 201)
+      return c.json({ decision: result }, 200)
     },
   )
