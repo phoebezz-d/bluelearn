@@ -13,6 +13,7 @@ import { hydratePaths } from "@/lib/getData";
 import paths from "@/data/paths.json"
 import guides from "@/data/guides.json"
 import { CollapsibleSection } from "@/components/CollapsibleSection";
+import { PaginationWrapper } from "@/components/PaginationWrapper";
 
 
 export const Route = createFileRoute("/browse")({
@@ -71,12 +72,21 @@ function RouteComponent() {
           }
           defaultOpen={true}
         >
-          <Separator className="mb-8 bg-border" />
+          <Separator className="mb-8 bg-border h-[0.5px]!" />
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
             {hydratedPaths.map((path: HydratedPath) => (
               <PathCard key={path.slug} path={path} />
             ))}
           </div>
+          <PaginationWrapper
+            activePageNo={1}
+            onPageSelect={() => {}}
+            toFirst={() => {}}
+            onPrevious={() => {}}
+            onNext={() => {}}
+            toLast={() => {}}
+            totalPages={5}
+          />
         </CollapsibleSection>
 
         <CollapsibleSection
@@ -93,6 +103,15 @@ function RouteComponent() {
               <GuideCard key={index} guide={guide} />
             ))} */}
           </div>
+          <PaginationWrapper
+            activePageNo={1}
+            onPageSelect={() => {}}
+            toFirst={() => {}}
+            onPrevious={() => {}}
+            onNext={() => {}}
+            toLast={() => {}}
+            totalPages={5}
+          />
         </CollapsibleSection>
       </section>
     </div>
