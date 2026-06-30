@@ -338,5 +338,16 @@
       "programming-fundamentals"
     ],
     "content": "# How to Create Character Movement in Unity."
+  },
+  {
+    "slug": "limits-and-continuity",
+    "title": "Limits and Continuity",
+    "author": "Dr. Sarah Jenkins",
+    "duration": 1200,
+    "created_at": "2026-06-30",
+    "breadcrumbs": ["Mathematics", "Calculus", "Limits"],
+    "tags": ["calculus"],
+    "prerequisites": ["functions-and-graphs"],
+    "content": "# Introduction to Limits\n\nIn calculus, we use limits to analyze the behavior of functions near specific points. \n\n### Inline Formula Test\n\nWe define the derivative of a function $f(x)$ at a point $x$ using the limit: $f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$. This should render inline with the surrounding text.\n\n### Block Formula Test\n\nIf the limit exists and the function is continuous, we can evaluate complex definite integrals. For example, the standard Gaussian integral renders in its own block:\n\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$\n\nThis guide serves to verify that both the inline `remark-math` parsing and block-level `rehype-katex` rendering are functioning correctly."
   }
 ]
