@@ -101,7 +101,7 @@ function RouteComponent() {
           defaultOpen={true}
         >
           <Separator className="mb-8 bg-border" />
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2">
             {allGuides.map((guide, index) => (
               <GuideCard key={index} guide={guide} />
             ))}
