@@ -14,6 +14,7 @@ import paths from "@/data/paths.json"
 import guides from "@/data/guides.json"
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { Pagination } from "@/components/Pagination";
+import { GuideCard } from "@/components/cards/GuideCard";
 
 
 export const Route = createFileRoute("/browse")({
@@ -25,7 +26,7 @@ function RouteComponent() {
 
   const allGuides = hydratedPaths.flatMap((p) => 
     p.levels.map((l) => l.guide)
-  );
+  ).slice(0, 6);
 
   const sectionHeadingCommonClassNames = "font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground ml-1";
 
@@ -101,9 +102,9 @@ function RouteComponent() {
         >
           <Separator className="mb-8 bg-border" />
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {/* {allGuides.map((guide, index) => (
+            {allGuides.map((guide, index) => (
               <GuideCard key={index} guide={guide} />
-            ))} */}
+            ))}
           </div>
           <div className="mt-8 mb-4">
             <Pagination
