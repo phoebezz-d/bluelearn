@@ -155,3 +155,104 @@
   height: 1.125rem !important;
   color: var(--foreground) !important;
 }
+
+/* == DROPDOWN & SELECT COMPONENTS == */
+[class*="_selectTrigger"],
+[class*="_toolbarNodeKindSelectTrigger"],
+[class*="_toolbarButtonSelectTrigger"] {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.2s ease !important;
+  font-family: var(--font-sans) !important;
+}
+
+[class*="_selectTrigger"]:hover,
+[class*="_toolbarNodeKindSelectTrigger"]:hover {
+  border-color: var(--ring) !important;
+  background-color: var(--secondary) !important;
+}
+
+[class*="_toolbarNodeKindSelectContainer"],
+[class*="_toolbarButtonDropdownContainer"] {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+  padding: 0.25rem !important;
+  z-index: 50 !important;
+}
+
+[class*="_selectItem"],
+[class*="_toolbarNodeKindSelectItem"] {
+  padding: 0.375rem 0.75rem !important;
+  border-radius: calc(var(--radius) - 2px) !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+  color: var(--foreground) !important;
+  display: flex !important;
+  align-items: center !important;
+  outline: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+[class*="_selectItem"][data-highlighted],
+[class*="_toolbarNodeKindSelectItem"][data-highlighted] {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+/* == DIALOGS & POPUPS == */
+[class*="_dialogContent"],
+[class*="_largeDialogContent"] {
+  border: 1px solid var(--border) !important;
+  background-color: var(--card) !important;
+  border-radius: var(--radius) !important;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+  padding: 1.25rem !important;
+  font-family: var(--font-sans) !important;
+}
+
+[class*="_dialogForm"] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.875rem !important;
+}
+
+[class*="_dialogInput"],
+[class*="_linkDialogInput"] {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.875rem !important;
+  outline: none !important;
+  transition: border-color 0.2s ease !important;
+  width: 100% !important;
+  font-family: var(--font-sans) !important;
+}
+
+[class*="_dialogInput"]:focus,
+[class*="_linkDialogInput"]:focus {
+  border-color: var(--ring) !important;
+}
+
+[class*="_dialogCloseButton"] {
+  color: var(--muted-foreground) !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+[class*="_dialogCloseButton"]:hover {
+  color: var(--foreground) !important;
+}
