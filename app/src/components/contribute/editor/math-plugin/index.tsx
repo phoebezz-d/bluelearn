@@ -44,37 +44,35 @@ type Segment = TextSegment | LinebreakSegment | ParagraphSegment;
 
 type CharacterPosition = { node: TextNode; offset: number } | null;
 
-type MathMatchResult = {
-  isInline: boolean;
-  startIdx: number;
-  delimLength: number;
-};
-
 // --- Helper Functions ---
 
 /**
- * Traverses the Lexical editor tree from root up to the anchor key / offset,
- * returning the traversed text segments.
+ * Validates whether the matched inline equation string conforms to inline math syntax.
+ * Rules:
+ * - Cannot be empty
+ * - Cannot contain newline characters
+ * - Cannot start or end with a space
  */
-function getSegmentsUntilAnchor(
-  root: LexicalNode,
-  anchorKey: string,
-  anchorOffset: number
-): { segments: Array<Segment>; foundAnchor: boolean } {
+function isValidInlineMathEquation(equation: string): boolean {
+  if (equation.length === 0) {
+    return false;
+  }
+  if (equation.includes("\n")) {
+    return false;
+  }
+  if (equation.startsWith(" ") || equation.endsWith(" ")) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Traverses the entire Lexical editor tree from root and returns all segments.
+ */
+function getAllSegments(root: LexicalNode): Array<Segment> {
   const segments: Array<Segment> = [];
-  let foundAnchor = false;
 
-  function traverse(node: LexicalNode): boolean {
-    if (node.getKey() === anchorKey) {
-      segments.push({
-        type: "text",
-        text: node.getTextContent().slice(0, anchorOffset),
-        node: node as TextNode,
-      });
-      foundAnchor = true;
-      return false;
-    }
-
+  function traverse(node: LexicalNode): void {
     if ($isTextNode(node)) {
       segments.push({
         type: "text",
@@ -94,9 +92,7 @@ function getSegmentsUntilAnchor(
         segments.push({ type: "paragraph" });
       }
       for (const child of children) {
-        if (traverse(child) === false) {
-          return false;
-        }
+        traverse(child);
       }
       if (
         isBlock &&
@@ -106,11 +102,10 @@ function getSegmentsUntilAnchor(
         segments.push({ type: "paragraph" });
       }
     }
-    return true;
   }
 
   traverse(root);
-  return { segments, foundAnchor };
+  return segments;
 }
 
 /**
@@ -142,69 +137,82 @@ function mapSegmentsToText(segments: Array<Segment>): {
 }
 
 /**
- * Searches backward from the end of the text to find the opening delimiter for either inline math ($)
- * or block math ($$). Returns null if no match is found.
+ * Finds the start and end indices of a math equation (inline or block) in the text.
  */
-function findMathDelimiterMatch(fullText: string): MathMatchResult | null {
-  if (fullText.endsWith("$$")) {
-    const closeIdx = fullText.length - 2;
-    if (closeIdx >= 2) {
-      let idx = closeIdx - 2;
-      while (idx >= 0) {
-        if (fullText[idx] === "$" && fullText[idx + 1] === "$") {
-          // Check to avoid matching '$$$'
-          if (idx === 0 || fullText[idx - 1] !== "$") {
+function findMathInText(text: string): {
+  isInline: boolean;
+  startIdx: number;
+  endIdx: number;
+  equation: string;
+} | null {
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === "$") {
+      // Check if it's block math ($$)
+      if (i + 1 < text.length && text[i + 1] === "$") {
+        // Find closing $$
+        let j = i + 2;
+        while (j < text.length) {
+          if (text[j] === "$" && j + 1 < text.length && text[j + 1] === "$") {
+            const equation = text.slice(i + 2, j);
             return {
               isInline: false,
-              startIdx: idx,
-              delimLength: 2,
+              startIdx: i,
+              endIdx: j + 1,
+              equation,
             };
           }
+          j++;
         }
-        idx--;
-      }
-    }
-  }
-
-  // Check for Inline Math
-  if (fullText.endsWith("$") && !fullText.endsWith("$$")) {
-    const closeIdx = fullText.length - 1;
-    if (closeIdx >= 1) {
-      let idx = closeIdx - 1;
-      while (idx >= 0) {
-        if (fullText[idx] === "$") {
-          // Ensure the dollar sign is not adjacent to another dollar sign
-          const notAdjacentToDollar =
-            (idx === 0 || fullText[idx - 1] !== "$") &&
-            fullText[idx + 1] !== "$";
-          if (notAdjacentToDollar) {
-            return {
-              isInline: true,
-              startIdx: idx,
-              delimLength: 1,
-            };
+        // Increment by 2 to skip block start delimiter
+        i += 2;
+        continue;
+      } else {
+        // Potential inline math ($)
+        // Find closing $
+        let j = i + 1;
+        while (j < text.length) {
+          if (text[j] === "$") {
+            if (j + 1 < text.length && text[j + 1] === "$") {
+              // Hit double $, which means inline math is invalid or it's start of block math
+              break;
+            }
+            const rawEquation = text.slice(i + 1, j);
+            if (isValidInlineMathEquation(rawEquation)) {
+              return {
+                isInline: true,
+                startIdx: i,
+                endIdx: j,
+                equation: rawEquation.trim(),
+              };
+            } else {
+              break;
+            }
           }
+          j++;
         }
-        idx--;
       }
     }
+    i++;
   }
-
   return null;
 }
 
 /**
- * Validates whether the matched inline equation string conforms to inline math syntax.
- * Rules:
- * - Cannot be empty
- * - Cannot contain newline characters
- * - Cannot start or end with a space
+ * Finds the starting index in the charMap for the given TextNode.
  */
-function isValidInlineMathEquation(equation: string): boolean {
-  if (equation.length === 0) return false;
-  if (equation.includes("\n")) return false;
-  if (equation.startsWith(" ") || equation.endsWith(" ")) return false;
-  return true;
+function findNodeStartIdx(
+  charMap: Array<CharacterPosition>,
+  node: TextNode
+): number {
+  const key = node.getKey();
+  for (let i = 0; i < charMap.length; i++) {
+    const pos = charMap[i];
+    if (pos && pos.node.getKey() === key) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 // --- Plugins & Components ---
@@ -241,90 +249,72 @@ export function MathShortcutTypeListener() {
             return;
           }
 
-          const textContent = anchorNode.getTextContent();
-
-          // Only check for shortcut formatting when the user has typed '$'
-          if (anchorOffset === 0 || textContent[anchorOffset - 1] !== "$") {
-            return;
-          }
-
           // Avoid triggering formatting inside code blocks
           const parentNode = anchorNode.getParent();
           if (parentNode === null || parentNode.getType() === "code") {
             return;
           }
 
-          const root = $getRoot();
-          const { segments, foundAnchor } = getSegmentsUntilAnchor(
-            root,
-            anchorKey,
-            anchorOffset
-          );
-
-          if (!foundAnchor) {
-            return;
-          }
-
-          const { fullText, charMap } = mapSegmentsToText(segments);
-          const match = findMathDelimiterMatch(fullText);
+          const textContent = anchorNode.getTextContent();
+          const match = findMathInText(textContent);
           if (!match) {
             return;
           }
 
-          const { isInline, startIdx, delimLength } = match;
-          const rawEquation = fullText.slice(
-            startIdx + delimLength,
-            fullText.length - delimLength
-          );
-
-          // Perform inline formatting validations
-          if (isInline && !isValidInlineMathEquation(rawEquation)) {
+          // Verify that selection is within or adjacent to the math equation
+          const isCursorInMatch =
+            anchorOffset >= match.startIdx &&
+            anchorOffset <= match.endIdx + 1;
+          if (!isCursorInMatch) {
             return;
           }
 
-          const equation = rawEquation.trim();
+          const root = $getRoot();
+          const allSegments = getAllSegments(root);
+          const { charMap } = mapSegmentsToText(allSegments);
+          const nodeStartIdx = findNodeStartIdx(charMap, anchorNode);
 
-          // Resolve start and end character positions to Lexical nodes
-          const startPos = charMap[startIdx];
-          const endPos = charMap[fullText.length - 1];
-          if (!startPos || !endPos) {
-            return;
-          }
+          if (nodeStartIdx !== -1) {
+            const startPos = charMap[nodeStartIdx + match.startIdx];
+            const endPos = charMap[nodeStartIdx + match.endIdx];
+            if (startPos && endPos) {
+              const startNodeKey = startPos.node.getKey();
+              const startOffset = startPos.offset;
+              const endNodeKey = endPos.node.getKey();
+              const endOffset = endPos.offset;
 
-          const startNodeKey = startPos.node.getKey();
-          const startOffset = startPos.offset;
-          const endNodeKey = endPos.node.getKey();
-          const endOffset = endPos.offset;
+              editor.update(() => {
+                const latestStartNode = $getNodeByKey(startNodeKey);
+                const latestEndNode = $getNodeByKey(endNodeKey);
 
-          // Replace range with the new MathNode
-          editor.update(() => {
-            const latestStartNode = $getNodeByKey(startNodeKey);
-            const latestEndNode = $getNodeByKey(endNodeKey);
+                if (
+                  !$isTextNode(latestStartNode) ||
+                  !$isTextNode(latestEndNode)
+                ) {
+                  return;
+                }
 
-            if (!$isTextNode(latestStartNode) || !$isTextNode(latestEndNode)) {
-              return;
+                const mathNode = $createMathNode(match.equation, match.isInline);
+                const rangeSelection = $createRangeSelection();
+                rangeSelection.anchor.set(
+                  latestStartNode.getKey(),
+                  startOffset,
+                  "text"
+                );
+                rangeSelection.focus.set(
+                  latestEndNode.getKey(),
+                  endOffset + 1,
+                  "text"
+                );
+                $setSelection(rangeSelection);
+                $insertNodes([mathNode]);
+
+                const nodeSelection = $createNodeSelection();
+                nodeSelection.add(mathNode.getKey());
+                $setSelection(nodeSelection);
+              });
             }
-
-            const mathNode = $createMathNode(equation, isInline);
-            const rangeSelection = $createRangeSelection();
-            rangeSelection.anchor.set(
-              latestStartNode.getKey(),
-              startOffset,
-              "text"
-            );
-            rangeSelection.focus.set(
-              latestEndNode.getKey(),
-              endOffset + 1,
-              "text"
-            );
-            $setSelection(rangeSelection);
-            $insertNodes([mathNode]);
-
-            // Automatically select the inserted math node
-            const nodeSelection = $createNodeSelection();
-            nodeSelection.add(mathNode.getKey());
-            $setSelection(nodeSelection);
-          });
+          }
         });
       }
     );
@@ -397,7 +387,7 @@ export function InsertBlockMath() {
         insertDecoratorNode(() => $createMathNode("", false));
       }}
       className="flex min-h-7 min-w-7 items-center justify-center gap-1 rounded p-1.5 text-slate-800 transition-colors hover:bg-slate-200"
-      title="Insert Block Math (e.g. $$f(x) = \sin(x)$$)"
+      title="Insert Block Math (e.g. $$f(x) = \\sin(x)$$)"
     >
       <span className="font-serif text-sm font-bold italic">$$</span>
     </button>

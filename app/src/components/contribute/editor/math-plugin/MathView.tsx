@@ -71,7 +71,9 @@ export function MathView({ nodeKey, equation, inline }: MathViewProps) {
   // Update Lexical Node equation on input changes
   useEffect(() => {
     const mf = ref.current;
-    if (!mf) return;
+    if (!mf) {
+      return;
+    }
 
     const handleInput = (e: Event) => {
       const newValue = (e.target as any).value;

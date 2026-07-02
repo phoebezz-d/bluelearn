@@ -35,22 +35,10 @@ import "./Editor.css";
 export default function Editor() {
   const [markdown, setMarkdown] = useState<string>(() => {
     const saved = localStorage.getItem("mdx_studio_content");
-    if (saved) return saved;
-    return `# Thank you for Contributing to BlueLearn 👋
-
-This is a clean, distraction-free markdown editing workspace. All changes are automatically saved locally.
-
-### Try writing some Markdown:
-- **Bold** or *Italic* text
-- Create a list
-- Insert code blocks, tables, links, or images using the toolbar above!
-
-### LaTeX Math Integration:
-Here is an inline equation: $e^{i\\pi} + 1 = 0$. Click on it to edit!
-
-And a block math equation:
-$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
-`;
+    if (saved) {
+      return saved;
+    }
+    return `# Thank you for Contributing to BlueLearn 👋\n\nThis is a clean, distraction-free markdown editing workspace. All changes are automatically saved locally.\n\n### Try writing some Markdown:\n- **Bold** or *Italic* text\n- Create a list\n- Insert code blocks, tables, links, or images using the toolbar above!\n\n### LaTeX Math Integration:\nHere is an inline equation: $e^{i\\pi} + 1 = 0$. Click on it to edit!\n\nAnd a block math equation:\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$\n`;
   });
 
   const editorRef = useRef<MDXEditorMethods>(null);

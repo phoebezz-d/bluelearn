@@ -1,6 +1,7 @@
 import { lexical } from "@mdxeditor/editor";
 import React from "react";
 import { MathView } from "./MathView";
+
 import type {
   EditorConfig,
   LexicalEditor,
