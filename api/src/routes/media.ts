@@ -17,7 +17,10 @@ export const mediaRouter = new Hono<HonoEnv>()
       return c.json({ error: 'Missing revision_id' }, 500)
 
     const supabase = c.get('supabase')
-    const entry = await uploadMediaFile(file, userId, supabase)
+    const mediaAsset = await uploadMediaFile(file, userId, supabase)
+
+    // Add to revision history
+    const revision = await addMediaRevision(revisionId, mediaAsset.id, supabase)
 
     return c.json(entry, 201)
   })
