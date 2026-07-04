@@ -187,6 +187,7 @@ export default function Editor() {
                     <PopoverContent
                       className="toolbar-popover-content"
                       align="start"
+                      onCloseAutoFocus={(e) => e.preventDefault()}
                     >
                       <div className="toolbar-popover-header">
                         LaTeX Equations
@@ -194,11 +195,12 @@ export default function Editor() {
                       <button
                         type="button"
                         className="toolbar-popover-item"
-                        onClick={() =>
+                        onClick={() => {
+                          editorRef.current?.focus();
                           inlineMathRef.current
                             ?.querySelector("button")
-                            ?.click()
-                        }
+                            ?.click();
+                        }}
                       >
                         <span className="w-4 text-center font-serif font-bold text-muted-foreground">
                           x
@@ -208,9 +210,12 @@ export default function Editor() {
                       <button
                         type="button"
                         className="toolbar-popover-item"
-                        onClick={() =>
-                          blockMathRef.current?.querySelector("button")?.click()
-                        }
+                        onClick={() => {
+                          editorRef.current?.focus();
+                          blockMathRef.current
+                            ?.querySelector("button")
+                            ?.click();
+                        }}
                       >
                         <span className="w-4 text-center font-serif font-bold text-muted-foreground italic">
                           $$
@@ -236,6 +241,7 @@ export default function Editor() {
                     <PopoverContent
                       className="toolbar-popover-content"
                       align="start"
+                      onCloseAutoFocus={(e) => e.preventDefault()}
                     >
                       <div className="toolbar-popover-header">Elements</div>
                       <button

@@ -52,9 +52,8 @@ export function MathView({ nodeKey, equation, inline }: MathViewProps) {
   };
 
   const handleBlur = () => {
-      setIsFocused(false);
+    setIsFocused(false);
   };
-
 
   // Load MathLive dynamically on the client (SSR safe)
   useEffect(() => {
@@ -82,12 +81,17 @@ export function MathView({ nodeKey, equation, inline }: MathViewProps) {
     }
   }, [isSelected, isLoaded]);
 
-  // Auto-focus empty equations when they are selected (e.g. immediately after insertion)
+  // Auto-focus empty equations immediately after insertion (when equation is empty)
   useEffect(() => {
-    if (isLoaded && isSelected && equation === "" && ref.current) {
-      ref.current.focus();
+    if (isLoaded && equation === "" && ref.current) {
+      const timeoutId = setTimeout(() => {
+        if (ref.current) {
+          ref.current.focus();
+        }
+      }, 100);
+      return () => clearTimeout(timeoutId);
     }
-  }, [isLoaded, isSelected, equation]);
+  }, [isLoaded, equation]);
 
   // Update Lexical Node equation on input changes
   useEffect(() => {
