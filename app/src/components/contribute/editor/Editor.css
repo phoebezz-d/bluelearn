@@ -142,12 +142,6 @@
 [class*="_toolbarRoot"] button:hover,
 [class*="_toolbarRoot"] [role="button"]:hover {
   background-color: var(--toolbar-hover-bg) !important;
-  transform: translateY(-0.5px);
-}
-
-[class*="_toolbarRoot"] button:active,
-[class*="_toolbarRoot"] [role="button"]:active {
-  transform: translateY(0px) !important;
 }
 
 [class*="_toolbarRoot"] button[data-state="on"],
