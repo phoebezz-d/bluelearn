@@ -57,10 +57,14 @@ export const prerequisitesRouter = new Hono<HonoEnv>()
       .update({ is_suspended: true })
       .eq("id", id)
       .select("id, is_suspended")
-      .single();
+      .maybeSingle();
 
     if (error) {
+      console.error(error);
       throw new ServiceError("Failed to suspend prerequisite", 500);
+    }
+    if (!data) {
+      throw new ServiceError("Prerequisite not found", 404);
     }
 
     return c.json({ edge: data }, 200);
