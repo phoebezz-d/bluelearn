@@ -26,7 +26,7 @@ export default function Editor() {
     if (saved) {
       return saved;
     }
-    return `# Thank you for Contributing to BlueLearn 👋\n\nThis is a clean, distraction-free markdown editing workspace. All changes are automatically saved locally.\n\n### Try writing some Markdown:\n- **Bold** or *Italic* text\n- Create a list\n- Insert code blocks, tables, links, or images using the toolbar above!\n\n### LaTeX Math Integration:\nHere is an inline equation: $e^{i\\pi} + 1 = 0$. Click on it to edit!\n\nAnd a block math equation:\n$$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$\n`;
+    return "";
   });
 
   const editorRef = useRef<MDXEditorMethods>(null);
@@ -48,6 +48,7 @@ export default function Editor() {
           markdown={markdown}
           onChange={setMarkdown}
           contentEditableClassName="mdxeditor-content"
+          placeholder="What will you teach the world today? Start typing here..."
           plugins={[
             headingsPlugin(),
             listsPlugin(),
