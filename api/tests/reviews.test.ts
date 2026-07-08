@@ -14,8 +14,6 @@ import {
 } from "./factories/guides";
 import { expectToMatchSpec } from "./openapi";
 
-// A realistic queue entry: a guide_publish case with an assigned seat for
-// `userId`, linked to a guide revision so the case carries a real title.
 async function seedQueueCase(userId: string, title: string) {
   const base = await createGuideBase();
   const guide = await createGuide(base.id);
@@ -74,7 +72,6 @@ describe("GET /reviews/queue", () => {
 });
 
 describe("GET /reviews/cases", () => {
-  // Contract-first: 501 stub. Asserts the documented case-list shape.
   it("lists review cases", async () => {
     const { userId } = await makeUser();
     const reviewCase = await seedQueueCase(userId, "Statistics");
@@ -89,7 +86,6 @@ describe("GET /reviews/cases", () => {
 });
 
 describe("GET /reviews/cases/{id}", () => {
-  // Contract-first: 501 stub. Asserts the documented case + panel + decisions shape.
   it("returns a case with its panel and decisions", async () => {
     const { userId } = await makeUser();
     const reviewCase = await seedQueueCase(userId, "Statistics");
@@ -114,7 +110,6 @@ describe("POST /reviews/cases/{id}/decisions", () => {
     await expectToMatchSpec(res, "POST", "/reviews/cases/{id}/decisions");
   });
 
-  // Contract-first: 501 stub. Asserts the documented recorded-decision shape.
   it("records an approving decision for an assigned panelist", async () => {
     const { token, userId } = await makeUser();
     const reviewCase = await seedQueueCase(userId, "Statistics");

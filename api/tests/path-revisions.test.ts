@@ -80,7 +80,6 @@ describe("PATCH /path-revisions/{id}", () => {
 });
 
 describe("POST /path-revisions/{id}/targets", () => {
-  // Contract-first: 501 stub. Asserts the documented recomputed-snapshot shape.
   it("adds a target and returns the recomputed snapshot", async () => {
     const { curator, revision } = await curatorDraft();
     const target = await createPublishedGuide();
@@ -97,7 +96,6 @@ describe("POST /path-revisions/{id}/targets", () => {
 });
 
 describe("DELETE /path-revisions/{id}/targets/{baseId}", () => {
-  // Contract-first: 501 stub. Asserts the documented recomputed-snapshot shape.
   it("removes a target and returns the recomputed snapshot", async () => {
     const { curator, revision } = await curatorDraft();
     const target = await createPublishedGuide();
@@ -245,7 +243,6 @@ describe("POST /path-revisions/{id}/rollback", () => {
 });
 
 describe("GET /path-revisions/{id}/diff/{otherId}", () => {
-  // Contract-first: 501 stub. Asserts the documented rendered-diff shape.
   it("returns the rendered diff between two revisions", async () => {
     const curator = await makeUser();
     await grantRole(curator.userId, "curator");

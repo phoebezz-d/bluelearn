@@ -158,8 +158,6 @@ describe("GET /paths/{slug}/revisions", () => {
 });
 
 describe("POST /paths/{slug}/revisions", () => {
-  // Contract-first: this endpoint is a 501 stub. Asserts the documented 201
-  // shape and stays red until the new-draft flow is implemented.
   it("opens a new draft revision", async () => {
     const curator = await makeUser();
     await grantRole(curator.userId, "curator");

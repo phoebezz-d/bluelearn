@@ -4,7 +4,7 @@ import { admin, insert } from "../helpers";
 type AppRole = Database["public"]["Enums"]["app_role"];
 
 // Role grants are admin-only in prod, so the factory writes with the service
-// client. makeUser's signup trigger already created the profile row.
+// client.
 export function grantRole(userId: string, role: AppRole) {
   return insert("user_roles", { user_id: userId, role });
 }

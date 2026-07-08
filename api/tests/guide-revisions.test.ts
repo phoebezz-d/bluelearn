@@ -136,8 +136,6 @@ describe("POST /guide-revisions/{id}/submit", () => {
 });
 
 describe("GET /guide-revisions/{id}/diff/{otherId}", () => {
-  // Contract-first: the diff endpoint is a 501 stub. This asserts the documented
-  // 200 shape and stays red until the diff is implemented.
   it("returns the diff between two revisions", async () => {
     const author = await makeUser();
     const base = await createGuideBase();

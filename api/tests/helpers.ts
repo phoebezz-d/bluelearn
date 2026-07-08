@@ -52,8 +52,6 @@ export async function insert<T extends keyof Tables>(
   ) as Row<T>;
 }
 
-// Create an authenticated user. Returns the access token to send as
-// `Authorization: Bearer <token>`.
 export async function makeUser(): Promise<{ token: string; userId: string }> {
   const email = `test-${crypto.randomUUID()}@example.com`;
   const password = "password123";

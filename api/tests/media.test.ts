@@ -10,7 +10,6 @@ describe("POST /media/upload", () => {
     await expectToMatchSpec(res, "POST", "/media/upload");
   });
 
-  // Contract-first: 501 stub. Asserts the documented stored-asset shape.
   it("stores an uploaded file and returns its url", async () => {
     const { token } = await makeUser();
     const form = new FormData();
