@@ -15,6 +15,7 @@ import paths from "@/data/paths.json";
 import subjects from "@/data/subjects.json";
 
 import { hydratePaths } from "@/lib/getData";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/review/")({ component: RouteComponent });
 
@@ -24,11 +25,6 @@ function RouteComponent() {
 
   const tabs = [
     {
-      id: "paths",
-      label: "Learning Paths",
-      content: <ReviewGrid type="paths" data={hydratedPaths} />,
-    },
-    {
       id: "guides",
       label: "Guides",
       content: <ReviewGrid type="guides" data={allGuides} />,
@@ -37,6 +33,11 @@ function RouteComponent() {
       id: "subjects",
       label: "Subjects",
       content: <ReviewGrid type="subjects" data={subjects} />,
+    },
+    {
+      id: "paths",
+      label: "Learning Paths",
+      content: <ReviewGrid type="paths" data={hydratedPaths} />,
     },
   ];
 
@@ -82,9 +83,28 @@ const ReviewGrid = ({ type, data }: ReviewGridProps) => {
   } else if (type == "subjects") {
     return (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {data.map((d: Subject) => (
-          <SubjectCard key={d.slug} subject={d} />
-        ))}
+        {subjects.map((subject: Subject) => {
+          const s = {
+            ...subject,
+            label: "Subjects",
+            stats: [
+              { label: "Objectives", data: subject.paths_total },
+              { label: "Guides", data: subject.guides_total },
+            ],
+            actionBtns: (
+              <div className="col-span-2 mt-5 flex items-center justify-around border-t-1 p-4 pt-8 lg:mt-0 lg:border-none lg:pt-4">
+                <Button variant="destructive" size="lg">
+                  Reject
+                </Button>
+
+                <Button className="btn-pri" size="lg">
+                  Approve
+                </Button>
+              </div>
+            ),
+          };
+          return <SubjectCard key={s.slug} subject={s} />;
+        })}
       </div>
     );
   }
