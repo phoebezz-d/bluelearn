@@ -24,8 +24,11 @@ import "./Editor.css";
 
 export default function Editor() {
   const [initialMarkdown] = useState<string>(() => {
-    const saved = localStorage.getItem("mdx_studio_content");
-    return saved || "";
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("mdx_studio_content");
+      return saved || "";
+    }
+    return "";
   });
 
   const editorRef = useRef<MDXEditorMethods>(null);
@@ -90,6 +93,7 @@ export default function Editor() {
               toast.warning("Heading 1 is Reserved for the Guide's Title", {
                 description:
                   "We have automatically converted it to Heading 2 (##) to keep your formatting clean.",
+                duration: 8000,
               });
             }}
           />

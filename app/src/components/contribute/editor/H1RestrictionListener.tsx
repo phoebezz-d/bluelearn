@@ -29,7 +29,12 @@ export default function H1RestrictionListener({
                 node instanceof HeadingNode &&
                 (node.getTag() as string) === "h1"
               ) {
-                node.setTag("h2");
+                const newHeading = $createHeadingNode("h2");
+                const children = node.getChildren();
+                for (const child of children) {
+                  newHeading.append(child);
+                }
+                node.replace(newHeading);
                 onH1Attempted();
               }
             });
