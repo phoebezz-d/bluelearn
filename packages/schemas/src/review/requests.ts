@@ -1,13 +1,5 @@
 import { z } from "zod";
-
-export const decisionReasonSchema = z.enum([
-  "hierarchy_issue",
-  "factual_error",
-  "duplicate_content",
-  "scope_violation",
-  "clarity_issue",
-  "missing_required_information",
-]);
+import { decisionReasonSchema } from "./enums";
 
 // An approve carries optional notes, whereas a reject must carry notes plus
 // at least one rubric reason.
@@ -24,4 +16,3 @@ export const createDecisionSchema = z.discriminatedUnion("decision", [
 ]);
 
 export type CreateDecisionInput = z.infer<typeof createDecisionSchema>;
-export type DecisionReason = z.infer<typeof decisionReasonSchema>;
