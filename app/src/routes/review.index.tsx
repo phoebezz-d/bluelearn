@@ -69,9 +69,12 @@ const ReviewGrid = ({ type, data }: ReviewGridProps) => {
   if (type == "paths") {
     return (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {data.map((d: HydratedPath) => (
-          <PathCard key={d.slug} path={d} />
-        ))}
+        {data.map((path: HydratedPath) => {
+          const p = {
+            ...path,
+          };
+          return <PathCard key={p.slug} path={p} />;
+        })}
       </div>
     );
   } else if (type == "guides") {
