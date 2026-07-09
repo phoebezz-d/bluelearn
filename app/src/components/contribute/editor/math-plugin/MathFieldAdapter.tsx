@@ -70,7 +70,7 @@ export const MathFieldAdapter = React.forwardRef<
         const win = window as any;
         // Pre-emptively intercept the module-level font prefetch before the import finishes evaluating
         if (!win.MathfieldElement || !win.MathfieldElement.fontsDirectory) {
-          let _mathfieldElement: any = { fontsDirectory: "/mathlive/fonts" };
+          let _mathfieldElement: any = { fontsDirectory: "/mathlive/fonts/" };
           try {
             Object.defineProperty(win, "MathfieldElement", {
               get() {
@@ -79,7 +79,7 @@ export const MathFieldAdapter = React.forwardRef<
               set(val) {
                 _mathfieldElement = val;
                 if (val) {
-                  val.fontsDirectory = "/mathlive/fonts";
+                  val.fontsDirectory = "/mathlive/fonts/";
                 }
               },
               configurable: true,
@@ -94,7 +94,7 @@ export const MathFieldAdapter = React.forwardRef<
 
         import("mathlive").then((ml) => {
           if (isMounted) {
-            ml.MathfieldElement.fontsDirectory = "/mathlive/fonts";
+            ml.MathfieldElement.fontsDirectory = "/mathlive/fonts/";
             setMathliveLoaded(true);
           }
         });
