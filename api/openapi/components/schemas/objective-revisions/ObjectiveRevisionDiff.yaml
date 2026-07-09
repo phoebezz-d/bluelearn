@@ -1,6 +1,6 @@
 type: object
 additionalProperties: false
-description: Rendered diff between two learning path revision snapshots.
+description: Rendered diff between two objective revision snapshots.
 properties:
   from:
     $ref: "../common/RevisionRef.yaml"
@@ -24,11 +24,11 @@ properties:
       added:
         type: array
         items:
-          $ref: "./PathNode.yaml"
+          $ref: "./ObjectiveNode.yaml"
       removed:
         type: array
         items:
-          $ref: "./PathNode.yaml"
+          $ref: "./ObjectiveNode.yaml"
       changed:
         type: array
         items:

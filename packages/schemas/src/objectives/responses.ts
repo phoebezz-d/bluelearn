@@ -2,7 +2,7 @@ import { z } from "zod";
 import { subjectReferenceSchema } from "../subjects";
 import { guideReferenceSchema } from "../guides/references";
 
-export const pathNodeSchema = z.object({
+export const objectiveNodeSchema = z.object({
   guide: guideReferenceSchema,
   level: z.number().int(),
   is_target: z.boolean(),
@@ -12,14 +12,14 @@ export const pathNodeSchema = z.object({
 });
 
 // A prerequisite edge between two nodes.
-export const pathEdgeSchema = z.object({
+export const objectiveEdgeSchema = z.object({
   from: z.string(),
   to: z.string(),
 });
 
-// A learning path's metadata, the leveled nodes, and the edges. word_count
+// A objective's metadata, the leveled nodes, and the edges. word_count
 // is the sum over included nodes the client turns into total reading time.
-export const learningPathSchema = z.object({
+export const objectiveSchema = z.object({
   slug: z.string(),
   title: z.string(),
   summary: z.string().nullable(),
@@ -27,10 +27,10 @@ export const learningPathSchema = z.object({
   created_at: z.iso.datetime(),
   word_count: z.number().int(),
   tags: z.array(subjectReferenceSchema),
-  nodes: z.array(pathNodeSchema),
-  edges: z.array(pathEdgeSchema),
+  nodes: z.array(objectiveNodeSchema),
+  edges: z.array(objectiveEdgeSchema),
 });
 
-export type PathNode = z.infer<typeof pathNodeSchema>;
-export type PathEdge = z.infer<typeof pathEdgeSchema>;
-export type LearningPath = z.infer<typeof learningPathSchema>;
+export type ObjectiveNode = z.infer<typeof objectiveNodeSchema>;
+export type ObjectiveEdge = z.infer<typeof objectiveEdgeSchema>;
+export type Objective = z.infer<typeof objectiveSchema>;

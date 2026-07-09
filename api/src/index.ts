@@ -10,9 +10,9 @@ import {
   guideRevisionsRouter,
 } from "./routes/guides";
 import {
-  learningPathsRouter,
-  learningPathRevisionsRouter,
-} from "./routes/learning-paths";
+  objectivesRouter,
+  objectiveRevisionsRouter,
+} from "./routes/objectives";
 import { prerequisitesRouter, todosRouter } from "./routes/graph";
 import { subjectsRouter } from "./routes/subjects";
 import { reviewsRouter } from "./routes/reviews";
@@ -28,8 +28,8 @@ const app = new Hono<HonoEnv>()
   .route("/guides", guidesRouter)
   .route("/variants", variantsRouter)
   .route("/guide-revisions", guideRevisionsRouter)
-  .route("/paths", learningPathsRouter)
-  .route("/path-revisions", learningPathRevisionsRouter)
+  .route("/objectives", objectivesRouter)
+  .route("/objective-revisions", objectiveRevisionsRouter)
   .route("/prerequisites", prerequisitesRouter)
   .route("/todos", todosRouter)
   .route("/subjects", subjectsRouter)

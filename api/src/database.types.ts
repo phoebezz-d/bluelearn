@@ -285,7 +285,7 @@ export type Database = {
           },
         ]
       }
-      learning_path_revision_edges: {
+      objective_revision_edges: {
         Row: {
           from_guide_base_id: string
           revision_id: string
@@ -303,22 +303,22 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "learning_path_revision_edges_from_is_node"
+            foreignKeyName: "objective_revision_edges_from_is_node"
             columns: ["revision_id", "from_guide_base_id"]
             isOneToOne: false
-            referencedRelation: "learning_path_revision_nodes"
+            referencedRelation: "objective_revision_nodes"
             referencedColumns: ["revision_id", "guide_base_id"]
           },
           {
-            foreignKeyName: "learning_path_revision_edges_to_is_node"
+            foreignKeyName: "objective_revision_edges_to_is_node"
             columns: ["revision_id", "to_guide_base_id"]
             isOneToOne: false
-            referencedRelation: "learning_path_revision_nodes"
+            referencedRelation: "objective_revision_nodes"
             referencedColumns: ["revision_id", "guide_base_id"]
           },
         ]
       }
-      learning_path_revision_nodes: {
+      objective_revision_nodes: {
         Row: {
           guide_base_id: string
           guide_id: string
@@ -345,14 +345,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "learning_path_revision_nodes_revision_id_fkey"
+            foreignKeyName: "objective_revision_nodes_revision_id_fkey"
             columns: ["revision_id"]
             isOneToOne: false
-            referencedRelation: "learning_path_revisions"
+            referencedRelation: "objective_revisions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "learning_path_revision_nodes_variant_of_base"
+            foreignKeyName: "objective_revision_nodes_variant_of_base"
             columns: ["guide_id", "guide_base_id"]
             isOneToOne: false
             referencedRelation: "guides"
@@ -360,15 +360,15 @@ export type Database = {
           },
         ]
       }
-      learning_path_revisions: {
+      objective_revisions: {
         Row: {
           author_id: string | null
           change_summary: string | null
           created_at: string
           id: string
-          learning_path_id: string
+          objective_id: string
           published_at: string | null
-          status: Database["public"]["Enums"]["learning_path_revision_status"]
+          status: Database["public"]["Enums"]["objective_revision_status"]
           summary: string | null
           title: string | null
           updated_at: string
@@ -378,9 +378,9 @@ export type Database = {
           change_summary?: string | null
           created_at?: string
           id?: string
-          learning_path_id: string
+          objective_id: string
           published_at?: string | null
-          status?: Database["public"]["Enums"]["learning_path_revision_status"]
+          status?: Database["public"]["Enums"]["objective_revision_status"]
           summary?: string | null
           title?: string | null
           updated_at?: string
@@ -390,31 +390,31 @@ export type Database = {
           change_summary?: string | null
           created_at?: string
           id?: string
-          learning_path_id?: string
+          objective_id?: string
           published_at?: string | null
-          status?: Database["public"]["Enums"]["learning_path_revision_status"]
+          status?: Database["public"]["Enums"]["objective_revision_status"]
           summary?: string | null
           title?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "learning_path_revisions_author_id_fkey"
+            foreignKeyName: "objective_revisions_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "learning_path_revisions_learning_path_id_fkey"
-            columns: ["learning_path_id"]
+            foreignKeyName: "objective_revisions_objective_id_fkey"
+            columns: ["objective_id"]
             isOneToOne: false
-            referencedRelation: "learning_paths"
+            referencedRelation: "objectives"
             referencedColumns: ["id"]
           },
         ]
       }
-      learning_paths: {
+      objectives: {
         Row: {
           created_at: string
           created_by: string | null
@@ -444,18 +444,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "learning_paths_created_by_fkey"
+            foreignKeyName: "objectives_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "learning_paths_current_revision_id_fkey"
+            foreignKeyName: "objectives_current_revision_id_fkey"
             columns: ["current_revision_id", "id"]
             isOneToOne: false
-            referencedRelation: "learning_path_revisions"
-            referencedColumns: ["id", "learning_path_id"]
+            referencedRelation: "objective_revisions"
+            referencedColumns: ["id", "objective_id"]
           },
         ]
       }
@@ -893,7 +893,7 @@ export type Database = {
         }
         Returns: string
       }
-      create_learning_path: {
+      create_objective: {
         Args: { p_summary?: string; p_targets: string[]; p_title?: string }
         Returns: string
       }
@@ -910,18 +910,18 @@ export type Database = {
         Args: { check_role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
-      project_path_edges: {
+      project_objective_edges: {
         Args: { p_revision_id: string }
         Returns: {
           from_guide_base_id: string
           to_guide_base_id: string
         }[]
       }
-      publish_learning_path_revision: {
+      publish_objective_revision: {
         Args: { p_revision_id: string }
         Returns: string
       }
-      rollback_learning_path_revision: {
+      rollback_objective_revision: {
         Args: { p_revision_id: string; p_source_revision_id: string }
         Returns: string
       }
@@ -952,7 +952,7 @@ export type Database = {
       | "scope_creep"
       edge_type: "prerequisite" | "related"
       knowledge_type: "theory" | "practice"
-      learning_path_revision_status: "draft" | "published"
+      objective_revision_status: "draft" | "published"
       node_status: "draft" | "published" | "archived"
       review_outcome: "approved" | "rejected"
       revision_status: "draft" | "submitted"
@@ -1109,7 +1109,7 @@ export const Constants = {
       ],
       edge_type: ["prerequisite", "related"],
       knowledge_type: ["theory", "practice"],
-      learning_path_revision_status: ["draft", "published"],
+      objective_revision_status: ["draft", "published"],
       node_status: ["draft", "published", "archived"],
       review_outcome: ["approved", "rejected"],
       revision_status: ["draft", "submitted"],

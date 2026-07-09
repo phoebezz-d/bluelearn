@@ -1,7 +1,7 @@
 type: object
 additionalProperties: false
 description: >
-  A path revision summary for the history list. Paths have no review gate, so a
+  An objective revision summary for the history list. Objectives have no review gate, so a
   revision is only ever draft or published; ordering is by published_at.
 properties:
   id:
@@ -14,7 +14,7 @@ properties:
     description: The curator's note describing what changed in this revision.
     type: [string, "null"]
   status:
-    $ref: "../common/LearningPathRevisionStatus.yaml"
+    $ref: "../common/ObjectiveRevisionStatus.yaml"
   created_at:
     $ref: "../common/Timestamp.yaml"
   published_at:

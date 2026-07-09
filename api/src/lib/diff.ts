@@ -1,4 +1,4 @@
-// Shared line-diff helpers used by both the guide-revision and learning-path-
+// Shared line-diff helpers used by both the guide-revision and objective-
 // revision diff endpoints. Extracted into one place so the wire format stays
 // identical across the two endpoints and the LCS walk is implemented once.
 //

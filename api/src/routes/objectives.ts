@@ -3,41 +3,41 @@ import { requireUser } from "../middleware/auth.middleware";
 import type { HonoEnv } from "../types";
 import { zValidator } from "@hono/zod-validator";
 import {
-  createLearningPathSchema,
+  createObjectiveSchema,
   rollbackRevisionSchema,
-  updatePathNodeSchema,
-  updatePathRevisionSchema,
+  updateObjectiveNodeSchema,
+  updateObjectiveRevisionSchema,
 } from "@bluelearn/schemas";
 import {
-  archiveLearningPath,
-  createLearningPath,
-  getLearningPathBySlug,
-  listLearningPathRevisions,
-  listPublishedLearningPaths,
-} from "../services/learning-path.service";
+  archiveObjective,
+  createObjective,
+  getObjectiveBySlug,
+  listObjectiveRevisions,
+  listPublishedObjectives,
+} from "../services/objective.service";
 import {
-  diffPathRevisions,
-  getLearningPathRevision,
-  publishLearningPathRevision,
-  rollbackLearningPathRevision,
-  updateLearningPathRevision,
-  updatePathNode,
-} from "../services/learning-path-revision.service";
+  diffObjectiveRevisions,
+  getObjectiveRevision,
+  publishObjectiveRevision,
+  rollbackObjectiveRevision,
+  updateObjectiveRevision,
+  updateObjectiveNode,
+} from "../services/objective-revision.service";
 
-export const learningPathsRouter = new Hono<HonoEnv>()
-  // Returns published paths as { learning_paths }.
+export const objectivesRouter = new Hono<HonoEnv>()
+  // Returns published objectives as { objectives }.
   .get("/", async (c) => {
-    const learning_paths = await listPublishedLearningPaths(c.get("supabase"));
-    return c.json({ learning_paths });
+    const objectives = await listPublishedObjectives(c.get("supabase"));
+    return c.json({ objectives });
   })
 
   // 201 with { revision_id } for the editor route.
   .post(
     "/",
     requireUser,
-    zValidator("json", createLearningPathSchema),
+    zValidator("json", createObjectiveSchema),
     async (c) => {
-      const { revision_id } = await createLearningPath(
+      const { revision_id } = await createObjective(
         c.get("supabase"),
         c.req.valid("json")
       );
@@ -45,27 +45,27 @@ export const learningPathsRouter = new Hono<HonoEnv>()
     }
   )
 
-  // Returns the path and its live revision's snapshot as { path, snapshot }.
+  // Returns the objective and its live revision's snapshot as { objective, snapshot }.
   .get("/:slug", async (c) => {
-    const { path, snapshot } = await getLearningPathBySlug(
+    const { objective, snapshot } = await getObjectiveBySlug(
       c.get("supabase"),
       c.req.param("slug")
     );
-    return c.json({ path, snapshot });
+    return c.json({ objective, snapshot });
   })
 
-  // Archives the path. 404 if missing or not permitted.
+  // Archives the objective. 404 if missing or not permitted.
   .delete("/:slug", requireUser, async (c) => {
-    const path = await archiveLearningPath(
+    const objective = await archiveObjective(
       c.get("supabase"),
       c.req.param("slug")
     );
-    return c.json({ path });
+    return c.json({ objective });
   })
 
   // Returns the revision history as { revisions }, newest first.
   .get("/:slug/revisions", async (c) => {
-    const revisions = await listLearningPathRevisions(
+    const revisions = await listObjectiveRevisions(
       c.get("supabase"),
       c.req.param("slug")
     );
@@ -77,10 +77,10 @@ export const learningPathsRouter = new Hono<HonoEnv>()
     c.json({ error: "Not implemented" }, 501)
   );
 
-export const learningPathRevisionsRouter = new Hono<HonoEnv>()
+export const objectiveRevisionsRouter = new Hono<HonoEnv>()
   // Returns the revision's metadata and snapshot as { revision, snapshot }.
   .get("/:id", async (c) => {
-    const { revision, snapshot } = await getLearningPathRevision(
+    const { revision, snapshot } = await getObjectiveRevision(
       c.get("supabase"),
       c.req.param("id")
     );
@@ -91,9 +91,9 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
   .patch(
     "/:id",
     requireUser,
-    zValidator("json", updatePathRevisionSchema),
+    zValidator("json", updateObjectiveRevisionSchema),
     async (c) => {
-      const { revision } = await updateLearningPathRevision(
+      const { revision } = await updateObjectiveRevision(
         c.get("supabase"),
         c.req.param("id"),
         c.req.valid("json")
@@ -118,9 +118,9 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
   .patch(
     "/:id/nodes/:baseId",
     requireUser,
-    zValidator("json", updatePathNodeSchema),
+    zValidator("json", updateObjectiveNodeSchema),
     async (c) => {
-      const { node } = await updatePathNode(
+      const { node } = await updateObjectiveNode(
         c.get("supabase"),
         c.req.param("id"),
         c.req.param("baseId"),
@@ -132,7 +132,7 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
 
   // Publishes the draft. Returns { slug }; 403 unless the author/curator.
   .post("/:id/publish", requireUser, async (c) => {
-    const { slug } = await publishLearningPathRevision(
+    const { slug } = await publishObjectiveRevision(
       c.get("supabase"),
       c.req.param("id")
     );
@@ -145,7 +145,7 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
     requireUser,
     zValidator("json", rollbackRevisionSchema),
     async (c) => {
-      const { revision_id } = await rollbackLearningPathRevision(
+      const { revision_id } = await rollbackObjectiveRevision(
         c.get("supabase"),
         c.req.param("id"),
         c.req.valid("json").revision_id
@@ -156,7 +156,7 @@ export const learningPathRevisionsRouter = new Hono<HonoEnv>()
 
   // Returns the diff between two revision snapshots as { from, to, fields, nodes, edges }.
   .get("/:id/diff/:otherId", async (c) => {
-    const { from, to, fields, nodes, edges } = await diffPathRevisions(
+    const { from, to, fields, nodes, edges } = await diffObjectiveRevisions(
       c.get("supabase"),
       c.req.param("id"),
       c.req.param("otherId")

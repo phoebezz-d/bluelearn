@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
-  UpdatePathNodeInput,
-  UpdatePathRevisionInput,
+  UpdateObjectiveNodeInput,
+  UpdateObjectiveRevisionInput,
 } from "@bluelearn/schemas";
 import type { Database } from "../database.types";
 import { ServiceError } from "../lib/service-error";
@@ -29,7 +29,7 @@ export async function getRevisionSnapshot(
   projectedSource: "frozen" | "live" = "frozen"
 ) {
   const { data: nodeRows, error: nodeError } = await supabase
-    .from("learning_path_revision_nodes")
+    .from("objective_revision_nodes")
     .select(NODE_COLS)
     .eq("revision_id", revisionId);
 
@@ -70,9 +70,9 @@ export async function getRevisionSnapshot(
 
   const projectedQuery =
     projectedSource === "live"
-      ? supabase.rpc("project_path_edges", { p_revision_id: revisionId })
+      ? supabase.rpc("project_objective_edges", { p_revision_id: revisionId })
       : supabase
-          .from("learning_path_revision_edges")
+          .from("objective_revision_edges")
           .select("from_guide_base_id, to_guide_base_id")
           .eq("revision_id", revisionId);
 
@@ -112,12 +112,9 @@ export async function getRevisionSnapshot(
   return { nodes, projected_edges, raw_edges };
 }
 
-export async function getLearningPathRevision(
-  supabase: DB,
-  revisionId: string
-) {
+export async function getObjectiveRevision(supabase: DB, revisionId: string) {
   const { data: revision, error } = await supabase
-    .from("learning_path_revisions")
+    .from("objective_revisions")
     .select(REVISION_META)
     .eq("id", revisionId)
     .maybeSingle();
@@ -137,13 +134,13 @@ export async function getLearningPathRevision(
 }
 
 // Overwrite a draft revision's metadata.
-export async function updateLearningPathRevision(
+export async function updateObjectiveRevision(
   supabase: DB,
   revisionId: string,
-  input: UpdatePathRevisionInput
+  input: UpdateObjectiveRevisionInput
 ) {
   const { data, error } = await supabase
-    .from("learning_path_revisions")
+    .from("objective_revisions")
     .update(input)
     .eq("id", revisionId)
     .select(REVISION_META);
@@ -157,14 +154,14 @@ export async function updateLearningPathRevision(
 
 // Edit one node of a draft revision: swap the pinned variant, toggle target/skip,
 // or set a note.
-export async function updatePathNode(
+export async function updateObjectiveNode(
   supabase: DB,
   revisionId: string,
   baseId: string,
-  input: UpdatePathNodeInput
+  input: UpdateObjectiveNodeInput
 ) {
   const { data, error } = await supabase
-    .from("learning_path_revision_nodes")
+    .from("objective_revision_nodes")
     .update(input)
     .eq("revision_id", revisionId)
     .eq("guide_base_id", baseId)
@@ -201,14 +198,14 @@ export async function updatePathNode(
 }
 
 // Publish the draft directly (no review gate): freeze its edge projection, point
-// the path at it, and freeze the slug on first publish in one transaction via the
-// publish_learning_path_revision RPC. Returns the live slug for routing.
-export async function publishLearningPathRevision(
+// the objective at it, and freeze the slug on first publish in one transaction via the
+// publish_objective_revision RPC. Returns the live slug for routing.
+export async function publishObjectiveRevision(
   supabase: DB,
   revisionId: string
 ) {
   const { data: slug, error } = await supabase.rpc(
-    "publish_learning_path_revision",
+    "publish_objective_revision",
     {
       p_revision_id: revisionId,
     }
@@ -225,16 +222,16 @@ export async function publishLearningPathRevision(
 }
 
 // Roll an older revision forward as a new draft: clone its nodes into a fresh
-// draft on the same path in one transaction via the rollback_learning_path_revision
+// draft on the same objective in one transaction via the rollback_objective_revision
 // RPC. Edges are not copied; a draft projects them live and freezes them only at
 // publish. Returns the draft revision id, so the client routes to its editor.
-export async function rollbackLearningPathRevision(
+export async function rollbackObjectiveRevision(
   supabase: DB,
   revisionId: string,
   sourceRevisionId: string
 ) {
   const { data: revision_id, error } = await supabase.rpc(
-    "rollback_learning_path_revision",
+    "rollback_objective_revision",
     {
       p_revision_id: revisionId,
       p_source_revision_id: sourceRevisionId,
@@ -243,7 +240,7 @@ export async function rollbackLearningPathRevision(
 
   if (error) {
     if (error.code === "P0002")
-      throw new ServiceError("Revision not found for this path", 404);
+      throw new ServiceError("Revision not found for this objective", 404);
     if (error.code === "42501")
       throw new ServiceError("Not permitted to roll back this revision", 403);
     throw new ServiceError("Unable to roll back revision", 400);
@@ -275,26 +272,26 @@ type NodeChange = {
   to: SnapshotNode;
 };
 
-// Rendered diff between two learning path revision snapshots. RLS still
+// Rendered diff between two objective revision snapshots. RLS still
 // applies; a hidden revision 404s. Compares title/summary fields, node
 // membership (added/removed/changed, keyed by guide_base_id) and projected
 // prerequisite edges (added/removed). Each side's edges are loaded with the
 // correct projection (frozen for published, live for draft) via
 // getRevisionSnapshot. Output arrays are sorted by a stable key so the diff
 // is deterministic regardless of row order from Postgres.
-export async function diffPathRevisions(
+export async function diffObjectiveRevisions(
   supabase: DB,
   id: string,
   otherId: string
 ) {
   const [fromRes, toRes] = await Promise.all([
     supabase
-      .from("learning_path_revisions")
+      .from("objective_revisions")
       .select(DIFF_REVISION_META)
       .eq("id", id)
       .maybeSingle(),
     supabase
-      .from("learning_path_revisions")
+      .from("objective_revisions")
       .select(DIFF_REVISION_META)
       .eq("id", otherId)
       .maybeSingle(),

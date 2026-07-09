@@ -2,14 +2,14 @@ type: object
 additionalProperties: false
 description: >
   A revision's curriculum graph: every node (included or skipped) and both edge
-  layers behind the show-skipped toggle. Shared by the public path page
-  (/paths/{slug}) and the revision editor (/path-revisions/{id}); each wraps it
+  layers behind the show-skipped toggle. Shared by the public objective page
+  (/objectives/{slug}) and the revision editor (/objective-revisions/{id}); each wraps it
   alongside its own identity object.
 properties:
   nodes:
     type: array
     items:
-      $ref: "../learning-path-revisions/PathNode.yaml"
+      $ref: "../objective-revisions/ObjectiveNode.yaml"
   projected_edges:
     description: >
       Hide-skipped view: the prerequisite edges among included nodes only,

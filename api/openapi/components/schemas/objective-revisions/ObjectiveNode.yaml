@@ -1,6 +1,6 @@
 type: object
 additionalProperties: false
-description: One topic in a path revision (included or skipped).
+description: One topic in an objective revision (included or skipped).
 properties:
   guide_base_id:
     $ref: "../common/Uuid.yaml"

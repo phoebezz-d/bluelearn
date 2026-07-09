@@ -1,5 +1,5 @@
-# Path items for /path-revisions. Referenced from ../openapi.yaml.
-/path-revisions/{id}:
+# Path items for /objective-revisions. Referenced from ../openapi.yaml.
+/objective-revisions/{id}:
   parameters:
     - name: id
       in: path
@@ -7,27 +7,27 @@
       schema:
         $ref: "../components/schemas/common/Uuid.yaml"
   get:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Get a revision snapshot
     description: >
       Metadata, the revision's nodes, and both edge sets behind the editor's
       show-skipped / hide-skipped toggle: the bridged projection over included
       nodes and the raw prerequisite edges among all nodes.
-    operationId: getPathRevision
+    operationId: getObjectiveRevision
     responses:
       "200":
         description: The revision snapshot
         content:
           application/json:
             schema:
-              $ref: "../components/schemas/learning-path-revisions/PathRevisionSnapshot.yaml"
+              $ref: "../components/schemas/objective-revisions/ObjectiveRevisionSnapshot.yaml"
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
   patch:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Overwrite a draft revision's metadata
     description: Draft only; a published revision is immutable.
-    operationId: updatePathRevision
+    operationId: updateObjectiveRevision
     security:
       - bearerAuth: []
     requestBody:
@@ -35,7 +35,7 @@
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/learning-path-revisions/UpdatePathRevisionRequest.yaml"
+            $ref: "../components/schemas/objective-revisions/UpdateObjectiveRevisionRequest.yaml"
     responses:
       "200":
         description: The updated revision
@@ -46,7 +46,7 @@
               additionalProperties: false
               properties:
                 revision:
-                  $ref: "../components/schemas/learning-path-revisions/LearningPathRevision.yaml"
+                  $ref: "../components/schemas/objective-revisions/ObjectiveRevision.yaml"
               required: [revision]
       "400":
         $ref: "../components/responses/_shared.yaml#/BadRequest"
@@ -57,7 +57,7 @@
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
 
-/path-revisions/{id}/targets:
+/objective-revisions/{id}/targets:
   parameters:
     - name: id
       in: path
@@ -65,10 +65,10 @@
       schema:
         $ref: "../components/schemas/common/Uuid.yaml"
   post:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Add a target
     description: >
-      Flags a guide base as one of the path's goals and walks its prerequisite
+      Flags a guide base as one of the objective's goals and walks its prerequisite
       closure. Topics not yet in the revision are inserted as included nodes
       pinned to their canonical variant. Topics already present are left as-is:
       their pinned variant, note, and included/skipped state are preserved, so a
@@ -76,7 +76,7 @@
       than resurrected. The added base itself is always flagged as a target and
       forced included, since a goal cannot be skipped from its own curriculum.
       Draft only. Returns the recomputed snapshot.
-    operationId: addPathTarget
+    operationId: addObjectiveTarget
     security:
       - bearerAuth: []
     requestBody:
@@ -97,7 +97,7 @@
         content:
           application/json:
             schema:
-              $ref: "../components/schemas/learning-path-revisions/PathRevisionSnapshot.yaml"
+              $ref: "../components/schemas/objective-revisions/ObjectiveRevisionSnapshot.yaml"
       "400":
         $ref: "../components/responses/_shared.yaml#/BadRequest"
       "401":
@@ -107,7 +107,7 @@
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
 
-/path-revisions/{id}/targets/{baseId}:
+/objective-revisions/{id}/targets/{baseId}:
   parameters:
     - name: id
       in: path
@@ -121,7 +121,7 @@
       schema:
         $ref: "../components/schemas/common/Uuid.yaml"
   delete:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Remove a target
     description: >
       Clears the target flag on a node, then prunes (deletes the rows of) every
@@ -129,7 +129,7 @@
       reached by another target is kept. Pruning deletes the node rather than
       skipping it: a skipped topic stays in the revision with is_included false,
       a pruned topic leaves it entirely. Draft only. Returns the recomputed snapshot.
-    operationId: removePathTarget
+    operationId: removeObjectiveTarget
     security:
       - bearerAuth: []
     responses:
@@ -138,7 +138,7 @@
         content:
           application/json:
             schema:
-              $ref: "../components/schemas/learning-path-revisions/PathRevisionSnapshot.yaml"
+              $ref: "../components/schemas/objective-revisions/ObjectiveRevisionSnapshot.yaml"
       "400":
         $ref: "../components/responses/_shared.yaml#/BadRequest"
       "401":
@@ -148,7 +148,7 @@
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
 
-/path-revisions/{id}/nodes/{baseId}:
+/objective-revisions/{id}/nodes/{baseId}:
   parameters:
     - name: id
       in: path
@@ -162,12 +162,12 @@
       schema:
         $ref: "../components/schemas/common/Uuid.yaml"
   patch:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Update a node
     description: >
       Swap the chosen variant, set a note, toggle is_target, or skip /
       re-include the node (is_included). Skipping is a soft hide, not a delete.
-    operationId: updatePathNode
+    operationId: updateObjectiveNode
     security:
       - bearerAuth: []
     requestBody:
@@ -175,7 +175,7 @@
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/learning-path-revisions/UpdateNodeRequest.yaml"
+            $ref: "../components/schemas/objective-revisions/UpdateNodeRequest.yaml"
     responses:
       "200":
         description: The updated node
@@ -186,7 +186,7 @@
               additionalProperties: false
               properties:
                 node:
-                  $ref: "../components/schemas/learning-path-revisions/PathNode.yaml"
+                  $ref: "../components/schemas/objective-revisions/ObjectiveNode.yaml"
               required: [node]
       "400":
         $ref: "../components/responses/_shared.yaml#/BadRequest"
@@ -197,7 +197,7 @@
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
 
-/path-revisions/{id}/publish:
+/objective-revisions/{id}/publish:
   parameters:
     - name: id
       in: path
@@ -205,10 +205,10 @@
       schema:
         $ref: "../components/schemas/common/Uuid.yaml"
   post:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Publish the revision
-    description: Publishes the draft directly (no review gate); freezes its edges and points the path at it.
-    operationId: publishPathRevision
+    description: Publishes the draft directly (no review gate); freezes its edges and points the objective at it.
+    operationId: publishObjectiveRevision
     security:
       - bearerAuth: []
     responses:
@@ -230,7 +230,7 @@
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
 
-/path-revisions/{id}/rollback:
+/objective-revisions/{id}/rollback:
   parameters:
     - name: id
       in: path
@@ -238,10 +238,10 @@
       schema:
         $ref: "../components/schemas/common/Uuid.yaml"
   post:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Roll back to an older revision
     description: Clones an older revision's targets/nodes into a new draft.
-    operationId: rollbackPathRevision
+    operationId: rollbackObjectiveRevision
     security:
       - bearerAuth: []
     requestBody:
@@ -276,7 +276,7 @@
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
 
-/path-revisions/{id}/diff/{otherId}:
+/objective-revisions/{id}/diff/{otherId}:
   parameters:
     - name: id
       in: path
@@ -289,15 +289,15 @@
       schema:
         $ref: "../components/schemas/common/Uuid.yaml"
   get:
-    tags: [learning-path-revisions]
+    tags: [objective-revisions]
     summary: Rendered diff between two revision snapshots
-    operationId: diffPathRevisions
+    operationId: diffObjectiveRevisions
     responses:
       "200":
         description: The rendered diff
         content:
           application/json:
             schema:
-              $ref: "../components/schemas/learning-path-revisions/LearningPathRevisionDiff.yaml"
+              $ref: "../components/schemas/objective-revisions/ObjectiveRevisionDiff.yaml"
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"

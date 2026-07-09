@@ -1,6 +1,6 @@
 type: object
 additionalProperties: false
-description: A learning path's stable identity, pointing at its live revision.
+description: A objective's stable identity, pointing at its live revision.
 properties:
   id:
     $ref: "../common/Uuid.yaml"

@@ -1,31 +1,31 @@
-# Path items for /paths. Referenced from ../openapi.yaml.
-/paths:
+# Path items for /objectives. Referenced from ../openapi.yaml.
+/objectives:
   get:
-    tags: [learning-paths]
-    summary: List published learning paths
-    operationId: listLearningPaths
+    tags: [objectives]
+    summary: List published objectives
+    operationId: listObjectives
     responses:
       "200":
-        description: Published learning paths
+        description: Published objectives
         content:
           application/json:
             schema:
               type: object
               additionalProperties: false
               properties:
-                learning_paths:
+                objectives:
                   type: array
                   items:
-                    $ref: "../components/schemas/learning-paths/LearningPathListItem.yaml"
-              required: [learning_paths]
+                    $ref: "../components/schemas/objectives/ObjectiveListItem.yaml"
+              required: [objectives]
   post:
-    tags: [learning-paths]
-    summary: Create a draft path
+    tags: [objectives]
+    summary: Create a draft objective
     description: >
       Creates the shell + revision 1, seeding the closure of the target
       guides as the initial node set. Returns the draft revision id for routing
       to the editor.
-    operationId: createLearningPath
+    operationId: createObjective
     security:
       - bearerAuth: []
     requestBody:
@@ -33,7 +33,7 @@
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/learning-paths/CreateLearningPathRequest.yaml"
+            $ref: "../components/schemas/objectives/CreateObjectiveRequest.yaml"
     responses:
       "201":
         description: Created; draft revision id
@@ -53,7 +53,7 @@
       "403":
         $ref: "../components/responses/_shared.yaml#/Forbidden"
 
-/paths/{slug}:
+/objectives/{slug}:
   parameters:
     - name: slug
       in: path
@@ -62,42 +62,42 @@
         type: string
       example: backend-engineer
   get:
-    tags: [learning-paths]
-    summary: Open a path
+    tags: [objectives]
+    summary: Open an objective
     description: Resolves the live current revision and returns its full snapshot.
-    operationId: getLearningPath
+    operationId: getObjective
     responses:
       "200":
-        description: The path + its current snapshot
+        description: The objective + its current snapshot
         content:
           application/json:
             schema:
               type: object
               additionalProperties: false
               properties:
-                path:
-                  $ref: "../components/schemas/learning-paths/LearningPath.yaml"
+                objective:
+                  $ref: "../components/schemas/objectives/Objective.yaml"
                 snapshot:
-                  $ref: "../components/schemas/learning-paths/PathSnapshot.yaml"
-              required: [path, snapshot]
+                  $ref: "../components/schemas/objectives/ObjectiveSnapshot.yaml"
+              required: [objective, snapshot]
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
   delete:
-    tags: [learning-paths]
-    summary: Archive a path
-    operationId: archiveLearningPath
+    tags: [objectives]
+    summary: Archive an objective
+    operationId: archiveObjective
     security:
       - bearerAuth: []
     responses:
       "200":
-        description: The archived path
+        description: The archived objective
         content:
           application/json:
             schema:
               type: object
               additionalProperties: false
               properties:
-                path:
+                objective:
                   type: object
                   additionalProperties: false
                   properties:
@@ -109,9 +109,9 @@
                     status:
                       $ref: "../components/schemas/common/NodeStatus.yaml"
                   required: [id, slug, status]
-              required: [path]
+              required: [objective]
             example:
-              path:
+              objective:
                 id: 00000000-0000-0000-0000-000000000000
                 slug: backend-engineer
                 status: archived
@@ -122,7 +122,7 @@
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
 
-/paths/{slug}/revisions:
+/objectives/{slug}/revisions:
   parameters:
     - name: slug
       in: path
@@ -131,9 +131,9 @@
         type: string
       example: backend-engineer
   get:
-    tags: [learning-paths]
-    summary: Revision history for this path
-    operationId: listLearningPathRevisions
+    tags: [objectives]
+    summary: Revision history for this objective
+    operationId: listObjectiveRevisions
     responses:
       "200":
         description: Revisions, newest first
@@ -146,14 +146,14 @@
                 revisions:
                   type: array
                   items:
-                    $ref: "../components/schemas/learning-path-revisions/LearningPathRevisionListItem.yaml"
+                    $ref: "../components/schemas/objective-revisions/ObjectiveRevisionListItem.yaml"
               required: [revisions]
       "404":
         $ref: "../components/responses/_shared.yaml#/NotFound"
   post:
-    tags: [learning-paths]
+    tags: [objectives]
     summary: Start a new draft revision
-    operationId: createLearningPathRevision
+    operationId: createObjectiveRevision
     security:
       - bearerAuth: []
     responses:
