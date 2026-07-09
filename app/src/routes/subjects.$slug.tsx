@@ -81,7 +81,17 @@ function SubjectPage() {
                 </div>
               ),
             };
-            return <GuideCard key={g.slug} guide={g} />;
+            return (
+              <GuideCard
+                key={g.slug}
+                guide={g}
+                origin={{
+                  type: "subject",
+                  title: slug,
+                  path: `/subjects/${slug}`,
+                }}
+              />
+            );
           })}
         </div>
       </section>

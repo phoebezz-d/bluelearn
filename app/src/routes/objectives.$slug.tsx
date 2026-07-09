@@ -58,7 +58,17 @@ function PathPage() {
                 </div>
               ),
             };
-            return <GuideCard key={g.slug} guide={g} />;
+            return (
+              <GuideCard
+                key={g.slug}
+                guide={g}
+                origin={{
+                  type: "objective",
+                  title: hydratedObjectives[0].title,
+                  path: `/objectives/${slug}`,
+                }}
+              />
+            );
           })}
         </div>
       </section>

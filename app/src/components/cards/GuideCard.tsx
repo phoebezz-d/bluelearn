@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import type { Guide } from "@/types/guides";
+import type { BreadcrumbOrigin } from "@/lib/breadcrumbs";
 
 import {
   Card,
@@ -20,9 +21,10 @@ type GuideProp = Guide & {
 
 type PropTypes = {
   guide: GuideProp;
+  origin?: BreadcrumbOrigin;
 };
 
-export const GuideCard = ({ guide }: PropTypes) => {
+export const GuideCard = ({ guide, origin }: PropTypes) => {
   return (
     <Card className="group rounded-md bg-background shadow-none transition-colors hover:bg-muted">
       {/* Header */}
@@ -41,7 +43,11 @@ export const GuideCard = ({ guide }: PropTypes) => {
           )}
         </div>
 
-        <Link to={GuideRoute.to} params={{ slug: guide.slug }}>
+        <Link
+          to={GuideRoute.to}
+          params={{ slug: guide.slug }}
+          state={{ breadcrumbOrigin: origin }}
+        >
           <h3 className="line-clamp-2 text-xl font-semibold tracking-tight">
             {guide.title}
           </h3>
