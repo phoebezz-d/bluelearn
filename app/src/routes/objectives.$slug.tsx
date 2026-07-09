@@ -12,7 +12,9 @@ import objectives from "@/data/objectives.json";
 import guides from "@/data/guides.json";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/paths/$slug")({ component: PathPage });
+export const Route = createFileRoute("/objectives/$slug")({
+  component: PathPage,
+});
 
 function PathPage() {
   const { slug } = Route.useParams();

@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { FooterStats } from "@/components/cards/FooterStats";
 
-import { Route as LearningPathRoute } from "@/routes/paths.$slug";
+import { Route as LearningPathRoute } from "@/routes/objectives.$slug";
 
 type PathProp = HydratedObjective & {
   stats?: Array<{ label: string; data: number }>;

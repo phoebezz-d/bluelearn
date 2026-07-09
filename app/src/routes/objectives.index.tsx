@@ -10,7 +10,9 @@ import { hydrateObjectives } from "@/lib/getData";
 import guides from "@/data/guides.json";
 import objectives from "@/data/objectives.json";
 
-export const Route = createFileRoute("/paths/")({ component: RouteComponent });
+export const Route = createFileRoute("/objectives/")({
+  component: RouteComponent,
+});
 
 function RouteComponent() {
   const hydratedObjectives: Array<HydratedObjective> = hydrateObjectives(
@@ -23,7 +25,7 @@ function RouteComponent() {
       <section className="border-b px-8 py-8 lg:px-16">
         <div className="mb-6">
           <h1 className="data-label text-[14px] tracking-[0.08em] text-muted-foreground uppercase">
-            Learning Paths
+            Learning Objectives
           </h1>
         </div>
 
@@ -31,12 +33,12 @@ function RouteComponent() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {hydratedObjectives.map((path: HydratedObjective) => {
+          {hydratedObjectives.map((objective: HydratedObjective) => {
             const p = {
-              ...path,
+              ...objective,
               stats: [
-                { label: "Duration", data: path.duration },
-                { label: "Guides", data: path.levels.length },
+                { label: "Duration", data: objective.duration },
+                { label: "Guides", data: objective.levels.length },
               ],
             };
             return <PathCard key={p.slug} path={p} />;
