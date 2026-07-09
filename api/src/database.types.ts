@@ -487,7 +487,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
+      },
       panel_members: {
         Row: {
           assigned_at: string
