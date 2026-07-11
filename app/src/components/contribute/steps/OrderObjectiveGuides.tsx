@@ -437,7 +437,7 @@ export const OrderObjectiveGuides = ({
                       </p>
                     </div>
                     <div className="shrink-0 rounded bg-primary px-2 py-1 font-mono text-[10px] font-semibold tracking-wider text-primary-foreground uppercase">
-                      Goal Target
+                      Target Guide
                     </div>
                   </div>
                 )}
