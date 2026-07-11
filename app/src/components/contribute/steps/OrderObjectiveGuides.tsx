@@ -73,8 +73,11 @@ const computeWalkthrough = (targetSlug: string): Array<WalkthroughNode> => {
   // 2. Compute levels for each node in the closure based on longest path depth
   const memo: Record<string, number> = {};
 
-  const getLevel = (slug: string): number => {
+  const getLevel = (slug: string, visited = new Set<string>()): number => {
     if (slug in memo) return memo[slug];
+    if (visited.has(slug)) {
+      return 1;
+    }
 
     const guide = guidesMap.get(slug);
     if (!guide || guide.prerequisites.length === 0) {
@@ -88,7 +91,12 @@ const computeWalkthrough = (targetSlug: string): Array<WalkthroughNode> => {
       return 1;
     }
 
-    const maxPrereqLevel = Math.max(...prereqsInClosure.map(getLevel));
+    visited.add(slug);
+    const maxPrereqLevel = Math.max(
+      ...prereqsInClosure.map((p) => getLevel(p, new Set(visited)))
+    );
+    visited.delete(slug);
+
     memo[slug] = maxPrereqLevel + 1;
     return maxPrereqLevel + 1;
   };
