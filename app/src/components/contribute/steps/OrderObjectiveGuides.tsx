@@ -432,8 +432,10 @@ export const OrderObjectiveGuides = ({
                               {guide.title}
                             </h4>
                           </div>
-                          {/* Author & Date under title, before description */}
-                          {(guide.author || guide.created_at) && (
+                          {/* Author, Date, & Duration under title, before description */}
+                          {(guide.author ||
+                            guide.created_at ||
+                            guide.duration) && (
                             <div className="mt-1 ml-8 flex flex-wrap items-center gap-2.5 text-[10px] text-muted-foreground/80">
                               {guide.author && (
                                 <span className="flex items-center gap-1">
@@ -447,33 +449,31 @@ export const OrderObjectiveGuides = ({
                                   {guide.created_at}
                                 </span>
                               )}
+                              {guide.duration && (
+                                <span className="flex items-center gap-1 font-medium">
+                                  <Clock className="h-3 w-3 text-muted-foreground/75" />
+                                  {guide.duration}m
+                                </span>
+                              )}
                             </div>
                           )}
                           <p className="mt-1.5 ml-8 text-xs text-muted-foreground">
                             {guide.summary}
                           </p>
-                          {/* Duration & Tags below description */}
-                          <div className="mt-2 ml-8 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-muted-foreground">
-                            {guide.duration && (
-                              <span className="flex items-center gap-1 font-medium">
-                                <Clock className="h-3.5 w-3.5 text-muted-foreground/75" />
-                                {guide.duration}m
-                              </span>
-                            )}
-                            {guide.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {guide.tags.map((tag) => (
-                                  <Badge
-                                    key={tag}
-                                    variant="outline"
-                                    className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
-                                  >
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                          {/* Tags below description */}
+                          {guide.tags.length > 0 && (
+                            <div className="mt-2 ml-8 flex flex-wrap gap-1">
+                              {guide.tags.map((tag) => (
+                                <Badge
+                                  key={tag}
+                                  variant="outline"
+                                  className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -516,8 +516,10 @@ export const OrderObjectiveGuides = ({
                           <Replace className="h-3.5 w-3.5" />
                         </Button>
                       </div>
-                      {/* Target Guide Author & Date under title, before description */}
-                      {(targetGuide.author || targetGuide.created_at) && (
+                      {/* Target Guide Author, Date, & Duration under title, before description */}
+                      {(targetGuide.author ||
+                        targetGuide.created_at ||
+                        targetGuide.duration) && (
                         <div className="mt-1 ml-7 flex flex-wrap items-center gap-2.5 text-[10px] text-muted-foreground/80">
                           {targetGuide.author && (
                             <span className="flex items-center gap-1">
@@ -531,33 +533,31 @@ export const OrderObjectiveGuides = ({
                               {targetGuide.created_at}
                             </span>
                           )}
+                          {targetGuide.duration && (
+                            <span className="flex items-center gap-1 font-medium">
+                              <Clock className="h-3 w-3 text-primary/70" />
+                              {targetGuide.duration}m
+                            </span>
+                          )}
                         </div>
                       )}
                       <p className="mt-1.5 ml-7 text-xs text-muted-foreground">
                         {targetGuide.summary}
                       </p>
-                      {/* Pinned target guide duration & tags below description */}
-                      <div className="mt-2 ml-7 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-muted-foreground">
-                        {targetGuide.duration && (
-                          <span className="flex items-center gap-1 font-medium">
-                            <Clock className="h-3.5 w-3.5 text-primary/70" />
-                            {targetGuide.duration}m
-                          </span>
-                        )}
-                        {targetGuide.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {targetGuide.tags.map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant="outline"
-                                className="mono-micro rounded-full border border-primary/20 bg-primary/5 tracking-[0.08em] text-primary"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      {/* Tags below description */}
+                      {targetGuide.tags.length > 0 && (
+                        <div className="mt-2 ml-7 flex flex-wrap gap-1">
+                          {targetGuide.tags.map((tag) => (
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className="mono-micro rounded-full border border-primary/20 bg-primary/5 tracking-[0.08em] text-primary"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -627,9 +627,11 @@ export const OrderObjectiveGuides = ({
                                 </span>
                               )}
                             </h4>
-                            {/* Author & Date under title, before description */}
+                            {/* Author, Date, & Duration under title, before description */}
                             {guideInfo &&
-                              (guideInfo.author || guideInfo.created_at) && (
+                              (guideInfo.author ||
+                                guideInfo.created_at ||
+                                guideInfo.duration) && (
                                 <div className="mt-1 flex flex-wrap items-center gap-2.5 text-[10px] text-muted-foreground/80">
                                   {guideInfo.author && (
                                     <span className="flex items-center gap-1">
@@ -643,33 +645,29 @@ export const OrderObjectiveGuides = ({
                                       {guideInfo.created_at}
                                     </span>
                                   )}
+                                  {guideInfo.duration && (
+                                    <span className="flex items-center gap-1 font-medium">
+                                      <Clock className="h-3 w-3 text-muted-foreground/75" />
+                                      {guideInfo.duration}m
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             <p className="mt-1.5 text-xs text-muted-foreground">
                               {node.summary}
                             </p>
-                            {/* Prerequisite guide duration & tags below description */}
-                            {guideInfo && (
-                              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-muted-foreground">
-                                {guideInfo.duration && (
-                                  <span className="flex items-center gap-1 font-medium">
-                                    <Clock className="h-3.5 w-3.5 text-muted-foreground/75" />
-                                    {guideInfo.duration}m
-                                  </span>
-                                )}
-                                {guideInfo.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {guideInfo.tags.map((tag) => (
-                                      <Badge
-                                        key={tag}
-                                        variant="outline"
-                                        className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
-                                      >
-                                        {tag}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
+                            {/* Tags below description */}
+                            {guideInfo && guideInfo.tags.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {guideInfo.tags.map((tag) => (
+                                  <Badge
+                                    key={tag}
+                                    variant="outline"
+                                    className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
                               </div>
                             )}
                           </div>
