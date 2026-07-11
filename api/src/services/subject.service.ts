@@ -94,3 +94,41 @@ export async function listSubjectGuides(supabase: DB, rawSlug: string) {
     summary: canonical?.current?.summary ?? null,
   }));
 }
+
+export async function listSubjectObjectives(supabase: DB, rawSlug: string) {
+  const { data: subject, error } = await supabase
+    .from("subjects")
+    .select("id")
+    .eq("slug", rawSlug)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    throw new ServiceError("Failed to load subject", 500);
+  }
+  if (!subject) throw new ServiceError("Subject not found", 404);
+
+  const { data, error: objError } = await supabase
+    .from("objectives")
+    .select(
+      `id, slug,
+       current:objective_revisions!objectives_current_revision_id_fkey(title, summary)`
+    )
+    .eq("objective_subjects.subject_id", subject.id)
+    .eq("status", "published")
+    .order("title", {
+      foreignTable: "objective_revisions",
+      ascending: true,
+    });
+
+  if (objError) {
+    console.error(objError);
+    throw new ServiceError("Failed to load subject objectives", 500);
+  }
+
+  return (data ?? []).map(({ current, ...rest }) => ({
+    ...rest,
+    title: current?.title ?? null,
+    summary: current?.summary ?? null,
+  }));
+}
