@@ -1,11 +1,16 @@
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import type {
+  ProfileAPI,
+  ProfileActivityRow,
+  ProfileRole,
+  ProfileStats,
+} from "@/lib/profile";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -13,49 +18,79 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
-import tableData from "@/data/tableData.json";
+import { fetchMyProfile } from "@/lib/profile";
 
 export const Route = createFileRoute("/profile")({
   component: RouteComponent,
 });
 
-function RouteComponent() {
+const DEFAULT_STATS: ProfileStats = {
+  upvotes: undefined,
+  downvotes: undefined,
+  contributions: undefined,
+  reviews: undefined,
+};
+// fucntion for getting the first two letters for the user's initials
+function getInitials(value: string | null | undefined) {
+  const text = value?.trim() ?? "";
+  if (!text) return "?";
+  const parts = text.split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+interface ProfilePageProps {
+  profile: ProfileAPI;
+  roles: Array<ProfileRole>;
+  stats?: ProfileStats;
+  activityRows?: Array<ProfileActivityRow>;
+}
+
+function ProfilePage({
+  profile,
+  roles,
+  stats = DEFAULT_STATS,
+  activityRows = [],
+}: ProfilePageProps) {
+  const roleLabel = roles.length > 0 ? roles.join(", ") : "Member";
+
+  const statsRows = useMemo(
+    () => [
+      { label: "Upvote", value: stats.upvotes ?? "—" },
+      { label: "Downvote", value: stats.downvotes ?? "—" },
+      { label: "Reviews", value: stats.reviews ?? "—" },
+      { label: "Contributions", value: stats.contributions ?? "—" },
+    ],
+    [stats]
+  );
+
+  const initials = getInitials(profile.display_name || profile.username);
+
   return (
-    <div className="mx-auto max-w-[1280px] border-x bg-background">
+    <div className="mx-auto max-w-7xl border-x bg-background">
       <section className="border-b px-8 py-10 lg:px-16">
         <div className="mb-6 flex flex-col items-center justify-center gap-8 sm:flex-row sm:items-center">
           <div className="flex flex-col items-center sm:w-1/4">
             <Avatar className="size-30 bg-gray-500">
-              <AvatarImage
-                src="https://github.com/shdcn.png"
-                alt="@shadcn"
-                className="grayscale"
-              />
+              <AvatarImage className="grayscale" />
               <AvatarFallback className="bg-gray-300 text-2xl font-bold text-black">
-                JD
+                {initials}
               </AvatarFallback>
             </Avatar>
-            <h2 className="mt-3 mb-3 text-xl font-bold">John_Doe</h2>
-            <h3 className="text-sm text-gray-600">Admin</h3>
+            <h2 className="mt-3 mb-1 text-xl font-bold">
+              {profile.display_name ?? profile.username}
+            </h2>
+            <h3 className="text-sm text-gray-600">{roleLabel}</h3>
           </div>
-          <div className="w-1/4">
+
+          <div className="w-full sm:w-1/4">
             <ul className="grid grid-cols-2 grid-rows-2 gap-y-8">
-              <li className="flex flex-col items-center">
-                <h3 className="text-sm font-semibold">UPVOTES</h3>
-                <p className="font-semibold">27</p>
-              </li>
-              <li className="flex flex-col items-center">
-                <h3 className="text-sm font-semibold">DOWNVOTES</h3>
-                <p className="font-semibold">27</p>
-              </li>
-              <li className="flex flex-col items-center">
-                <h3 className="text-sm font-semibold">UPVOTES</h3>
-                <p className="font-semibold">27</p>
-              </li>
-              <li className="flex flex-col items-center">
-                <h3 className="text-sm font-semibold">UPVOTES</h3>
-                <p className="font-semibold">27</p>
-              </li>
+              {statsRows.map((stat) => (
+                <li key={stat.label} className="flex flex-col items-center">
+                  <h3 className="data-label">{stat.label}</h3>
+                  <p className="font-semibold">{stat.value}</p>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -78,26 +113,95 @@ function RouteComponent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tableData.map((data) => (
-                <TableRow key={data.type}>
-                  <TableCell className="px-4 py-3">{data.type}</TableCell>
-                  <TableCell className="px-4 py-3">{data.title}</TableCell>
-                  <TableCell className="px-4 py-3">
-                    {data.change_summary}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">{data.date}</TableCell>
-                  <TableCell className="px-4 py-3">{data.status}</TableCell>
-                  <TableCell className="px-4 py-3">
-                    <Button className="bg-gray-400 text-black uppercase">
-                      {data.review_case}
-                    </Button>
+              {activityRows.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="px-4 py-6 text-center text-sm text-muted-foreground"
+                  >
+                    No activity available yet.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                activityRows.map((data, index) => (
+                  <TableRow key={`${data.type}-${index}`}>
+                    <TableCell className="px-4 py-3">{data.type}</TableCell>
+                    <TableCell className="px-4 py-3">{data.title}</TableCell>
+                    <TableCell className="px-4 py-3">
+                      {data.change_summary}
+                    </TableCell>
+                    <TableCell className="px-4 py-3">{data.date}</TableCell>
+                    <TableCell className="px-4 py-3">{data.status}</TableCell>
+                    <TableCell className="px-4 py-3">
+                      <Button className="bg-gray-400 text-black uppercase">
+                        {data.review_case}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
       </section>
     </div>
+  );
+}
+
+function RouteComponent() {
+  const [profile, setProfile] = useState<ProfileAPI | null>(null);
+  const [roles, setRoles] = useState<Array<ProfileRole>>([]);
+  const [stats, setStats] = useState<ProfileStats>(DEFAULT_STATS);
+  const [activityRows, setActivityRows] = useState<Array<ProfileActivityRow>>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchMyProfile()
+      .then((result) => {
+        setProfile(result.profile);
+        setRoles(result.roles);
+        setStats(result.stats ?? DEFAULT_STATS);
+        setActivityRows(result.activity ?? []);
+      })
+      .catch((err) => setError(err.message ?? "Unable to load profile."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl border-x bg-background px-8 py-10 lg:px-16">
+        <p className="text-sm text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl border-x bg-background px-8 py-10 lg:px-16">
+        <p className="text-sm text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="mx-auto max-w-7xl border-x bg-background px-8 py-10 lg:px-16">
+        <p className="text-sm text-muted-foreground">
+          Profile data is unavailable.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <ProfilePage
+      profile={profile}
+      roles={roles}
+      stats={stats}
+      activityRows={activityRows}
+    />
   );
 }
