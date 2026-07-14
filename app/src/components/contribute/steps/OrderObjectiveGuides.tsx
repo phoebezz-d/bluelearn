@@ -6,10 +6,12 @@ import {
   Info,
   Layers,
   ListOrdered,
-  Milestone,
+  Maximize,
+  Minimize,
   Replace,
   User,
 } from "lucide-react";
+import { GuideGraph } from "../graph-view/GuideGraph";
 import type { Dispatch, SetStateAction } from "react";
 import type { ObjectiveContribution } from "@/types/contributions";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import guidesData from "@/data/guides.json";
 
 // Map for O(1) guide lookup
@@ -145,6 +146,7 @@ export const OrderObjectiveGuides = ({
   );
   const [curatedSequence, setCuratedSequence] = useState<Array<string>>([]);
   const [isVariantAlertOpen, setIsVariantAlertOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Check if the current sequence has a custom ordering (deviating from strict level/prerequisite ordering)
   const checkIsCustomSequence = (): boolean => {
@@ -292,22 +294,6 @@ export const OrderObjectiveGuides = ({
     updateSubObjective(targetSlug, newSeq);
   };
 
-  // Group walkthrough nodes by level for display
-  const groupedLevels = walkthroughNodes.reduce(
-    (acc, node) => {
-      if (!acc[node.level]) {
-        acc[node.level] = [];
-      }
-      acc[node.level]?.push(node);
-      return acc;
-    },
-    {} as Record<number, Array<WalkthroughNode> | undefined>
-  );
-
-  const sortedLevels = Object.keys(groupedLevels)
-    .map(Number)
-    .sort((a, b) => a - b);
-
   return (
     <Stepper.Content step="objective-ordering">
       <StepperActionHeader title={"Order Guides"} Stepper={Stepper} />
@@ -338,7 +324,13 @@ export const OrderObjectiveGuides = ({
           </div>
         </Field>
 
-        <div className="grid h-[calc(100vh-450px)] min-h-87.5 w-full grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
+        <div
+          className={
+            isFullscreen
+              ? "fixed inset-0 z-50 grid animate-in grid-cols-1 items-stretch gap-6 bg-background/95 p-6 backdrop-blur-md fade-in lg:grid-cols-12"
+              : "grid h-[calc(100vh-450px)] min-h-87.5 w-full grid-cols-1 items-stretch gap-6 lg:grid-cols-12"
+          }
+        >
           {/* Left Pane: Curated Sequence (7 cols) */}
           <Card className="flex h-full max-h-full flex-col overflow-hidden rounded-lg border border-border bg-card/35 shadow-none backdrop-blur-sm lg:col-span-7">
             <CardHeader className="border-b pb-4">
@@ -577,115 +569,40 @@ export const OrderObjectiveGuides = ({
           {/* Right Pane: Generated Walkthrough by Level (5 cols) */}
           <Card className="flex h-full max-h-full flex-col overflow-hidden rounded-lg border border-border bg-muted/10 shadow-none lg:col-span-5">
             <CardHeader className="border-b pb-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Layers className="h-5 w-5 text-primary" />
-                <CardTitle className="text-base font-semibold text-foreground">
-                  Prerequisite Guides
-                </CardTitle>
+              <div className="flex w-full items-center justify-between">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Layers className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-base font-semibold text-foreground">
+                    Prerequisite Guides
+                  </CardTitle>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="-mr-2 flex items-center gap-2"
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                >
+                  {isFullscreen ? (
+                    <Minimize className="h-4 w-4" />
+                  ) : (
+                    <Maximize className="h-4 w-4" />
+                  )}
+                  {isFullscreen ? "Exit" : "Expand"}
+                </Button>
               </div>
               <CardDescription>
                 Select guides from the target's computed prerequisite DAG to
                 include in your curation.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 space-y-6 overflow-y-auto p-4">
-              {sortedLevels.map((level) => (
-                <div key={level} className="space-y-3">
-                  <div className="flex items-center gap-2 border-b pb-1">
-                    <Milestone className="h-4 w-4 text-primary" />
-                    <span className="font-mono text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                      Level {level}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {groupedLevels[level]?.map((node) => {
-                      const isTarget = node.slug === targetSlug;
-                      const isChecked =
-                        isTarget || curatedSequence.includes(node.slug);
-                      const guideInfo = guidesMap.get(node.slug);
-
-                      return (
-                        <div
-                          key={node.slug}
-                          onClick={() => {
-                            if (!isTarget) {
-                              handleToggleGuide(node.slug, !isChecked);
-                            }
-                          }}
-                          className={`flex items-start gap-3 rounded-lg border p-3 shadow-sm transition-all select-none ${
-                            isTarget
-                              ? "cursor-default border-primary/30 bg-primary/5 opacity-90"
-                              : isChecked
-                                ? "cursor-pointer border-primary/25 bg-primary/5 hover:bg-primary/10"
-                                : "cursor-pointer border-border bg-background hover:bg-muted/30"
-                          }`}
-                        >
-                          <div className="pt-0.5">
-                            <Checkbox
-                              checked={isChecked}
-                              disabled={isTarget}
-                              className="pointer-events-none"
-                            />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h4 className="flex items-center gap-2 text-sm font-medium text-foreground">
-                              {node.title}
-                              {isTarget && (
-                                <span className="inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-primary uppercase">
-                                  Target
-                                </span>
-                              )}
-                            </h4>
-                            {/* Author, Date, & Duration under title, before description */}
-                            {guideInfo &&
-                              (guideInfo.author ||
-                                guideInfo.created_at ||
-                                guideInfo.duration) && (
-                                <div className="mt-1 flex flex-wrap items-center gap-2.5 text-[10px] text-muted-foreground/80">
-                                  {guideInfo.author && (
-                                    <span className="flex items-center gap-1">
-                                      <User className="h-3 w-3 text-muted-foreground/75" />
-                                      @{guideInfo.author}
-                                    </span>
-                                  )}
-                                  {guideInfo.created_at && (
-                                    <span className="flex items-center gap-1">
-                                      <Calendar className="h-3 w-3 text-muted-foreground/75" />
-                                      {guideInfo.created_at}
-                                    </span>
-                                  )}
-                                  {guideInfo.duration && (
-                                    <span className="flex items-center gap-1 font-medium">
-                                      <Clock className="h-3 w-3 text-muted-foreground/75" />
-                                      {guideInfo.duration}m
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            <p className="mt-1.5 text-xs text-muted-foreground">
-                              {node.summary}
-                            </p>
-                            {/* Tags below description */}
-                            {guideInfo && guideInfo.tags.length > 0 && (
-                              <div className="mt-2 flex flex-wrap gap-1">
-                                {guideInfo.tags.map((tag) => (
-                                  <Badge
-                                    key={tag}
-                                    variant="outline"
-                                    className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
-                                  >
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+            <CardContent className="relative flex-1 overflow-hidden p-0">
+              <GuideGraph
+                walkthroughNodes={walkthroughNodes}
+                curatedSequence={curatedSequence}
+                targetSlug={targetSlug}
+                onToggleGuide={handleToggleGuide}
+                guidesMap={guidesMap}
+              />
             </CardContent>
           </Card>
         </div>
