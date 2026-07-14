@@ -51,7 +51,7 @@ A guide base is the graph node. It stores no content of its own, as all content 
 - `canonical_guide_id`: nullable FK to `guides`. Points at the guide currently designated canonical, which is decided from a upvote/downvote system. Null before any guide is published. Creates a guide base ↔ guide pointer cycle (guide_bases → guides → guide_bases), so the FK should be deferrable.
 - `slug`: stable URL identifier.
 - `title`: human-readable title of the topic.
-- `knowledge_type`: `theory` (a grand explanation of something we can observe) or `practice` (a route to a specific, well-defined goal). Determines how the topic is structured and what its guides are called: `practice` guides display as **methods**, `theory` guides as **alternatives**.
+- `knowledge_type`: `theoretical` (a grand explanation of something we can observe) or `practical` (a route to a specific, well-defined goal). Determines how the topic is structured and what its guides are called: `practical` guides display as **methods**, `theoretical` guides as **alternatives**.
 - `status`: draft lifecycle state (see enum below).
 - `created_at`: row creation time.
 - `updated_at`: last update time.
