@@ -21,6 +21,7 @@ type GuideGraphProps = {
   targetSlug: string;
   onToggleGuide: (slug: string, isChecked: boolean) => void;
   guidesMap: Map<string, any>;
+  hoveredGuide: string | null;
 };
 
 export function GuideGraph({
@@ -29,6 +30,7 @@ export function GuideGraph({
   targetSlug,
   onToggleGuide,
   guidesMap,
+  hoveredGuide,
 }: GuideGraphProps) {
   const { nodes, edges } = useMemo(() => {
     // Group by level to calculate horizontal/vertical positions
@@ -70,6 +72,7 @@ export function GuideGraph({
             isTarget,
             isChecked,
             selectedOrder: selectedOrder !== -1 ? selectedOrder + 1 : null,
+            isHovered: node.slug === hoveredGuide,
           },
         });
       });
@@ -100,7 +103,7 @@ export function GuideGraph({
     });
 
     return { nodes: newNodes, edges: newEdges };
-  }, [walkthroughNodes, curatedSequence, targetSlug, guidesMap]);
+  }, [walkthroughNodes, curatedSequence, targetSlug, guidesMap, hoveredGuide]);
 
   const onNodeClick = useCallback(
     (_: any, node: Node) => {
@@ -114,6 +117,7 @@ export function GuideGraph({
   return (
     <div className="relative h-full w-full">
       <ReactFlow
+        key={targetSlug}
         nodes={nodes}
         edges={edges}
         onNodeClick={onNodeClick}

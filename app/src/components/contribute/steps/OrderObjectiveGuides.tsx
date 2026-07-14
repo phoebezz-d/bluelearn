@@ -10,6 +10,7 @@ import {
   Minimize,
   Replace,
   User,
+  Workflow,
 } from "lucide-react";
 import { GuideGraph } from "../graph-view/GuideGraph";
 import type { Dispatch, SetStateAction } from "react";
@@ -145,8 +146,8 @@ export const OrderObjectiveGuides = ({
     objectiveContData.targets[0] || ""
   );
   const [curatedSequence, setCuratedSequence] = useState<Array<string>>([]);
-  const [isVariantAlertOpen, setIsVariantAlertOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hoveredGuide, setHoveredGuide] = useState<string | null>(null);
 
   // Check if the current sequence has a custom ordering (deviating from strict level/prerequisite ordering)
   const checkIsCustomSequence = (): boolean => {
@@ -255,6 +256,7 @@ export const OrderObjectiveGuides = ({
   const handleDragStart = (e: React.DragEvent, index: number) => {
     draggedIndexRef.current = index;
     setDraggedIndex(index);
+    setHoveredGuide(null); // Clear hover state to prevent graph re-renders
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", index.toString());
   };
@@ -280,6 +282,7 @@ export const OrderObjectiveGuides = ({
   const handleDragEnd = () => {
     draggedIndexRef.current = null;
     setDraggedIndex(null);
+    setHoveredGuide(null);
   };
 
   // Toggle selection of guide in the walkthrough
@@ -331,8 +334,12 @@ export const OrderObjectiveGuides = ({
               : "grid h-[calc(100vh-450px)] min-h-87.5 w-full grid-cols-1 items-stretch gap-6 lg:grid-cols-12"
           }
         >
-          {/* Left Pane: Curated Sequence (7 cols) */}
-          <Card className="flex h-full max-h-full flex-col overflow-hidden rounded-lg border border-border bg-card/35 shadow-none backdrop-blur-sm lg:col-span-7">
+          {/* Left Pane: Curated Sequence */}
+          <Card
+            className={`flex h-full max-h-full flex-col overflow-hidden rounded-lg border border-border bg-card/35 shadow-none backdrop-blur-sm ${
+              isFullscreen ? "lg:col-span-4" : "lg:col-span-7"
+            }`}
+          >
             <CardHeader className="border-b pb-4">
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2 text-primary">
@@ -359,7 +366,7 @@ export const OrderObjectiveGuides = ({
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto p-4">
-              {curatedSequence.length === 0 && (
+              {curatedSequence.length === 0 && walkthroughNodes.length > 1 && (
                 <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
                   <Info className="mb-2 h-8 w-8 text-muted-foreground opacity-50" />
                   <p className="text-sm font-medium">
@@ -386,11 +393,17 @@ export const OrderObjectiveGuides = ({
                       onDragStart={(e) => handleDragStart(e, index)}
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDragEnd={handleDragEnd}
-                      className={`relative flex items-center justify-between gap-3 rounded-lg border p-3 pl-12 shadow-sm transition-all select-none ${
+                      className={`relative flex items-center justify-between gap-3 rounded-lg border p-3 pl-12 shadow-sm transition-all duration-300 select-none ${
                         isDragging
-                          ? "cursor-grabbing border-primary/50 bg-primary/5 opacity-40"
+                          ? "z-10 scale-[1.02] cursor-grabbing border-2 border-dashed border-primary bg-primary/10 opacity-80 ring-4 ring-primary/20"
                           : "cursor-grab border-border bg-background hover:border-primary/30"
-                      }`}
+                      } ${hoveredGuide === slug ? "border-primary/50 ring-2 ring-primary/40" : ""}`}
+                      onMouseEnter={() => {
+                        if (draggedIndex === null) setHoveredGuide(slug);
+                      }}
+                      onMouseLeave={() => {
+                        if (draggedIndex === null) setHoveredGuide(null);
+                      }}
                     >
                       {/* Left controls column positioned absolutely with background and border separation */}
                       <div className="absolute inset-y-0 left-0 z-10 w-9 rounded-l-lg border-r border-border/70 bg-muted/40">
@@ -472,13 +485,9 @@ export const OrderObjectiveGuides = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 border-none p-0 text-primary hover:bg-primary/20"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsVariantAlertOpen(true);
-                          }}
-                          onDragStart={(e) => e.stopPropagation()}
-                          title="Swap Variant"
+                          disabled
+                          className="h-8 w-8 cursor-not-allowed border-none p-0 text-muted-foreground/40 hover:bg-transparent"
+                          title="Variants Coming Soon"
                         >
                           <Replace className="h-5 w-5" />
                         </Button>
@@ -489,7 +498,20 @@ export const OrderObjectiveGuides = ({
 
                 {/* Automatically Pinned Target Guide */}
                 {targetGuide && (
-                  <div className="flex items-start gap-3 rounded-lg border border-primary bg-primary/5 p-3 shadow-sm">
+                  <div
+                    className={`flex items-start gap-3 rounded-lg border border-primary bg-primary/5 p-3 shadow-sm transition-all duration-300 ${
+                      hoveredGuide === targetGuide.slug
+                        ? "shadow-md ring-2 ring-primary/40"
+                        : ""
+                    }`}
+                    onMouseEnter={() => {
+                      if (draggedIndex === null)
+                        setHoveredGuide(targetGuide.slug);
+                    }}
+                    onMouseLeave={() => {
+                      if (draggedIndex === null) setHoveredGuide(null);
+                    }}
+                  >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground">
@@ -551,11 +573,9 @@ export const OrderObjectiveGuides = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 border-none p-0 text-primary hover:bg-primary/20"
-                        onClick={() => {
-                          setIsVariantAlertOpen(true);
-                        }}
-                        title="Swap Target Variant"
+                        disabled
+                        className="h-8 w-8 cursor-not-allowed border-none p-0 text-muted-foreground/40 hover:bg-transparent"
+                        title="Variants Coming Soon"
                       >
                         <Replace className="h-5 w-5" />
                       </Button>
@@ -566,12 +586,16 @@ export const OrderObjectiveGuides = ({
             </CardContent>
           </Card>
 
-          {/* Right Pane: Generated Walkthrough by Level (5 cols) */}
-          <Card className="flex h-full max-h-full flex-col overflow-hidden rounded-lg border border-border bg-muted/10 shadow-none lg:col-span-5">
+          {/* Right Pane: Generated Walkthrough by Level */}
+          <Card
+            className={`flex h-full max-h-full flex-col overflow-hidden rounded-lg border border-border bg-muted/10 shadow-none ${
+              isFullscreen ? "lg:col-span-8" : "lg:col-span-5"
+            }`}
+          >
             <CardHeader className="border-b pb-4">
               <div className="flex w-full items-center justify-between">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Layers className="h-5 w-5 text-primary" />
+                  <Workflow className="h-5 w-5 text-primary" />
                   <CardTitle className="text-base font-semibold text-foreground">
                     Prerequisite Guides
                   </CardTitle>
@@ -602,38 +626,12 @@ export const OrderObjectiveGuides = ({
                 targetSlug={targetSlug}
                 onToggleGuide={handleToggleGuide}
                 guidesMap={guidesMap}
+                hoveredGuide={hoveredGuide}
               />
             </CardContent>
           </Card>
         </div>
       </FieldGroup>
-
-      {/* Swap Variant Dialog Modal */}
-      {isVariantAlertOpen && (
-        <div className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-black/80 p-4 backdrop-blur-xs duration-200 fade-in">
-          <div className="w-full max-w-sm animate-in rounded-xl border border-border bg-card p-6 text-center shadow-lg duration-200 zoom-in-95">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Replace className="h-6 w-6" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground">
-              Variant Selection Coming Soon
-            </h3>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              Choosing alternative guide variants is currently under
-              development. In this version, objectives only support the
-              canonical versions of the selected guides.
-            </p>
-            <div className="mt-6 border-t pt-4">
-              <Button
-                className="w-full"
-                onClick={() => setIsVariantAlertOpen(false)}
-              >
-                Got it
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </Stepper.Content>
   );
 };
