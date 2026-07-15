@@ -1,7 +1,9 @@
 import { defineStepper } from "@stepperize/react";
-import { useMemo, useState } from "react";
+import { ChevronRight } from "lucide-react";
+import { Fragment, useMemo, useState } from "react";
 
 import type { Dispatch, SetStateAction } from "react";
+
 import type {
   ContributionType,
   GuideContribution,
@@ -18,9 +20,12 @@ import { OrderObjectiveGuides } from "@/components/contribute/steps/OrderObjecti
 
 import { flows, typeStep } from "@/lib/contributionFlow";
 
-export default function ContributionFlow() {
-  const [type, setType] = useState<ContributionType | null>(null);
+type PropTypes = {
+  type: ContributionType | null;
+  setType: (value: ContributionType) => void;
+};
 
+export default function ContributionFlow({ type, setType }: PropTypes) {
   const [guideContData, setGuideContData] = useState<GuideContribution>({
     type: "",
     title: "",
@@ -54,16 +59,19 @@ export default function ContributionFlow() {
     return defineStepper([...typeStep, ...flows[type]]);
   }, [type]);
 
-  const { Stepper, useStepper } = StepperInstance;
+  const { Stepper } = StepperInstance;
 
   return (
-    <Stepper.Root className="flex h-full w-full">
-      {() => (
+    <Stepper.Root
+      linear
+      className="flex min-h-[calc(100vh_-_210px)] w-full flex-col gap-8"
+    >
+      {({ stepper }: any) => (
         <Inner
+          Stepper={Stepper}
+          stepper={stepper}
           type={type}
           setType={setType}
-          useStepper={useStepper}
-          Stepper={Stepper}
           guideContData={guideContData}
           setGuideContData={setGuideContData}
           objectiveContData={objectiveContData}
@@ -75,42 +83,42 @@ export default function ContributionFlow() {
 }
 
 function Inner({
+  Stepper,
+  stepper,
   type,
   setType,
-  useStepper,
-  Stepper,
   guideContData,
   setGuideContData,
   objectiveContData,
   setObjectiveContData,
 }: {
-  type: ContributionType | null;
-  setType: (t: ContributionType) => void;
-  useStepper: any;
   Stepper: any;
+  stepper: any;
+  type: ContributionType | null;
+  setType: (value: ContributionType) => void;
+
   guideContData: GuideContribution;
   setGuideContData: Dispatch<SetStateAction<GuideContribution>>;
+
   objectiveContData: ObjectiveContribution;
   setObjectiveContData: Dispatch<SetStateAction<ObjectiveContribution>>;
 }) {
-  const stepper = useStepper();
-
   const pickType = (value: ContributionType) => {
     setType(value);
 
     requestAnimationFrame(() => {
-      let nextStep = "objective-details";
-
       switch (value) {
         case "guide":
-          nextStep = "guide-details";
+          stepper.goTo("guide-details");
           break;
-        case "variant":
-          nextStep = "variant-details";
-          break;
-      }
 
-      stepper.goTo(nextStep);
+        case "variant":
+          stepper.goTo("variant-details");
+          break;
+
+        default:
+          stepper.goTo("objective-details");
+      }
     });
   };
 
@@ -131,11 +139,25 @@ function Inner({
                 </Stepper.Indicator>
 
                 <Stepper.Title />
+    <>
+      {/* horizontal breadcrumb stepper */}
+      <Stepper.List className="flex w-full items-center justify-center text-sm">
+        <Stepper.Items>
+          {(step: any, index: number) => (
+            <Fragment key={step.id}>
+              {index > 0 && (
+                <ChevronRight className="mx-1 size-4 text-muted-foreground/50" />
+              )}
+
+              <Stepper.Item step={step.id}>
+                <Stepper.Trigger className="rounded-md p-2 font-mono text-[12px] text-muted-foreground uppercase transition-colors hover:bg-muted data-[status=active]:font-bold data-[status=active]:text-brand-blue data-[status=previous]:text-foreground">
+                  <Stepper.Title />
+                </Stepper.Trigger>
               </Stepper.Item>
-            )}
-          </Stepper.Items>
-        </Stepper.List>
-      </div>
+            </Fragment>
+          )}
+        </Stepper.Items>
+      </Stepper.List>
 
       {/* content */}
       <div className="flex min-w-0 flex-1 flex-col">
@@ -163,7 +185,43 @@ function Inner({
         />
 
         <Submit Stepper={Stepper} />
+      <div className="flex-1">
+        <Stepper.Content step="type">
+          <SelectType pickType={pickType} type={type} Stepper={Stepper} />
+        </Stepper.Content>
+
+        <Stepper.Content step="guide-details">
+          <GuideDetails
+            Stepper={Stepper}
+            guideContData={guideContData}
+            setGuideContData={setGuideContData}
+          />
+        </Stepper.Content>
+
+        <Stepper.Content step="variant-details">
+          <VariantDetails Stepper={Stepper} />
+        </Stepper.Content>
+
+        <Stepper.Content step="objective-details">
+          <ObjectiveDetails
+            Stepper={Stepper}
+            objectiveContData={objectiveContData}
+            setObjectiveContData={setObjectiveContData}
+          />
+        </Stepper.Content>
+
+        <Stepper.Content step="content">
+          <Content Stepper={Stepper} />
+        </Stepper.Content>
+
+        <Stepper.Content step="objective-ordering">
+          <OrderObjectiveGuides Stepper={Stepper} />
+        </Stepper.Content>
+
+        <Stepper.Content step="submit">
+          <Submit Stepper={Stepper} />
+        </Stepper.Content>
       </div>
-    </div>
+    </>
   );
 }
