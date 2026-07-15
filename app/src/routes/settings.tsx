@@ -219,7 +219,7 @@ function RouteComponent() {
                     Email Preference
                   </h3>
                   <Input
-                    defaultValue="Receive ....."
+                    defaultValue="Unsubscribe from Emails"
                     className="border border-border"
                   />
                 </div>
