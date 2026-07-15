@@ -286,11 +286,11 @@ function RouteComponent() {
                 <div className="pt-4">
                   <Button
                     variant="destructive"
-                    className="bg-red-600 font-mono text-sm font-bold tracking-[0.08em] uppercase hover:bg-red-700"
+                    className="whi font-mono text-sm font-bold tracking-[0.08em] uppercase hover:bg-red-700"
                   >
                     Delete Account
                   </Button>
-                  <p className="mt-3 font-mono text-sm font-bold tracking-[0.08em] text-white uppercase">
+                  <p className="mt-3 font-mono text-sm font-bold tracking-[0.08em] text-red-600 uppercase">
                     This action cannot be undone
                   </p>
                 </div>
