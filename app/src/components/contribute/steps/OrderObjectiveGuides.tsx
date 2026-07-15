@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Calendar,
   Clock,
@@ -49,7 +49,6 @@ type WalkthroughNode = {
   level: number;
 };
 
-// Compute transitive prerequisites for a given target guide to generate the Walkthrough DAG
 const computeWalkthrough = (targetSlug: string): Array<WalkthroughNode> => {
   // 1. Find all nodes in the transitive prerequisite closure
   const closure = new Set<string>();
@@ -70,11 +69,8 @@ const computeWalkthrough = (targetSlug: string): Array<WalkthroughNode> => {
   // 2. Compute levels for each node in the closure based on longest path depth
   const memo: Record<string, number> = {};
 
-  const getLevel = (slug: string, visited = new Set<string>()): number => {
+  const getLevel = (slug: string): number => {
     if (slug in memo) return memo[slug];
-    if (visited.has(slug)) {
-      return 1;
-    }
 
     const guide = guidesMap.get(slug);
     if (!guide || guide.prerequisites.length === 0) {
@@ -82,17 +78,9 @@ const computeWalkthrough = (targetSlug: string): Array<WalkthroughNode> => {
       return 1;
     }
 
-    const prereqsInClosure = guide.prerequisites.filter((p) => closure.has(p));
-    if (prereqsInClosure.length === 0) {
-      memo[slug] = 1;
-      return 1;
-    }
-
-    visited.add(slug);
     const maxPrereqLevel = Math.max(
-      ...prereqsInClosure.map((p) => getLevel(p, new Set(visited)))
+      ...guide.prerequisites.map((p: string) => getLevel(p))
     );
-    visited.delete(slug);
 
     memo[slug] = maxPrereqLevel + 1;
     return maxPrereqLevel + 1;
@@ -114,28 +102,6 @@ const computeWalkthrough = (targetSlug: string): Array<WalkthroughNode> => {
   return result;
 };
 
-// Helper to get transitive prerequisites of a guide
-const getTransitivePrereqs = (slug: string): Set<string> => {
-  const prereqs = new Set<string>();
-  const queue = [slug];
-  const visited = new Set<string>();
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    if (visited.has(current)) continue;
-    visited.add(current);
-    const guide = guidesMap.get(current);
-    if (guide) {
-      for (const p of guide.prerequisites) {
-        if (!prereqs.has(p)) {
-          prereqs.add(p);
-          queue.push(p);
-        }
-      }
-    }
-  }
-  return prereqs;
-};
-
 export const OrderObjectiveGuides = ({
   Stepper,
   objectiveContData,
@@ -148,7 +114,6 @@ export const OrderObjectiveGuides = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hoveredGuide, setHoveredGuide] = useState<string | null>(null);
 
-  // Check if the current sequence has a custom ordering (deviating from strict level/prerequisite ordering)
   const checkIsCustomSequence = (): boolean => {
     const slugToIndex: Record<string, number> = {};
     curatedSequence.forEach((slug, idx) => {
@@ -156,9 +121,10 @@ export const OrderObjectiveGuides = ({
     });
 
     return curatedSequence.some((slug) => {
-      const transPrereqs = getTransitivePrereqs(slug);
-      return Array.from(transPrereqs).some(
-        (prereq) =>
+      const guide = guidesMap.get(slug);
+      if (!guide) return false;
+      return guide.prerequisites.some(
+        (prereq: string) =>
           prereq in slugToIndex && slugToIndex[prereq] > slugToIndex[slug]
       );
     });
@@ -173,7 +139,9 @@ export const OrderObjectiveGuides = ({
   const targetGuide = targetSlug ? guidesMap.get(targetSlug) : undefined;
 
   // Compute walkthrough nodes for the target
-  const walkthroughNodes = targetSlug ? computeWalkthrough(targetSlug) : [];
+  const walkthroughNodes = useMemo(() => {
+    return targetSlug ? computeWalkthrough(targetSlug) : [];
+  }, [targetSlug]);
 
   const updateSubObjective = (slug: string, newSeq: Array<string>) => {
     setObjectiveContData((prev) => {
@@ -349,7 +317,7 @@ export const OrderObjectiveGuides = ({
                 </div>
                 <div className="flex items-center gap-1.5 pr-1 select-none">
                   <span
-                    className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                    className={`h-2 w-2 rounded-full transition-all duration-150 ${
                       isCustomSequence
                         ? "animate-pulse bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
                         : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
@@ -392,7 +360,7 @@ export const OrderObjectiveGuides = ({
                       onDragStart={(e) => handleDragStart(e, index)}
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDragEnd={handleDragEnd}
-                      className={`relative flex items-center justify-between gap-3 rounded-lg border p-3 pl-12 shadow-sm transition-all duration-300 select-none ${
+                      className={`relative flex items-center justify-between gap-3 rounded-lg border p-3 pl-12 shadow-sm transition-all duration-150 select-none ${
                         isDragging
                           ? "z-10 scale-[1.02] cursor-grabbing border-2 border-dashed border-primary bg-primary/10 opacity-80 ring-4 ring-primary/20"
                           : "cursor-grab border-border bg-background hover:border-primary/30"
@@ -498,7 +466,7 @@ export const OrderObjectiveGuides = ({
                 {/* Automatically Pinned Target Guide */}
                 {targetGuide && (
                   <div
-                    className={`flex items-start gap-3 rounded-lg border border-primary bg-primary/5 p-3 shadow-sm transition-all duration-300 ${
+                    className={`flex items-start gap-3 rounded-lg border border-primary bg-primary/5 p-3 shadow-sm transition-all duration-150 ${
                       hoveredGuide === targetGuide.slug
                         ? "shadow-md ring-2 ring-primary/40"
                         : ""
@@ -626,6 +594,7 @@ export const OrderObjectiveGuides = ({
                 onToggleGuide={handleToggleGuide}
                 guidesMap={guidesMap}
                 hoveredGuide={hoveredGuide}
+                onHoverGuide={setHoveredGuide}
               />
             </CardContent>
           </Card>
