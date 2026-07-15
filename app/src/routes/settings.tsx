@@ -209,7 +209,7 @@ function RouteComponent() {
                 <div>
                   <h3 className="mb-3 font-mono text-sm font-medium">In-App</h3>
                   <Input
-                    defaultValue="Receive notifications......"
+                    defaultValue="Turn off In-App notifications"
                     className="border border-border"
                   />
                 </div>
