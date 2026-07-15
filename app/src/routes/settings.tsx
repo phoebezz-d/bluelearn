@@ -292,7 +292,7 @@ function RouteComponent() {
                   >
                     Delete Account
                   </Button>
-                  <p className="mt-3 font-mono text-sm font-bold tracking-[0.08em] text-red-600 uppercase">
+                  <p className="mt-3 font-mono text-sm font-bold tracking-[0.08em] text-white uppercase">
                     This action cannot be undone
                   </p>
                 </div>
