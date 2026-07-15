@@ -286,7 +286,7 @@ function RouteComponent() {
                 <div className="pt-4">
                   <Button
                     variant="destructive"
-                    className="whi font-mono text-sm font-bold tracking-[0.08em] uppercase hover:bg-red-700"
+                    className="font-mono text-sm font-bold tracking-[0.08em] text-white uppercase hover:bg-red-700"
                   >
                     Delete Account
                   </Button>
