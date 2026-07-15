@@ -16,7 +16,8 @@ import { Separator } from "@/components/ui/separator";
 const navItems = [
   { label: "Browse", to: "/browse" },
   { label: "Subjects", to: "/subjects" },
-  { label: "Learning Paths", to: "/paths" },
+  { label: "Objectives", to: "/objectives" },
+  { label: "Review", to: "/review" },
 ];
 
 const profileItems = [

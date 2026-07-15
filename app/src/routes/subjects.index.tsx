@@ -5,6 +5,8 @@ import type { Subject } from "@/types/subjects";
 import { Separator } from "@/components/ui/separator";
 
 import { SubjectCard } from "@/components/cards/SubjectCard";
+import { Route as SubjectRoute } from "@/routes/subjects.$slug";
+
 import subjects from "@/data/subjects.json";
 
 export const Route = createFileRoute("/subjects/")({
@@ -25,9 +27,19 @@ function RouteComponent() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {subjects.map((subject: Subject) => (
-            <SubjectCard key={subject.slug} subject={subject} />
-          ))}
+          {subjects.map((subject: Subject) => {
+            const s = {
+              ...subject,
+              label: "Subjects",
+              stats: [
+                { label: "Objectives", data: subject.paths_total },
+                { label: "Guides", data: subject.guides_total },
+              ],
+            };
+            return (
+              <SubjectCard key={s.slug} subject={s} to={SubjectRoute.to} />
+            );
+          })}
         </div>
       </section>
     </div>

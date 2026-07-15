@@ -1,9 +1,14 @@
 import type { Subject, SubjectReference } from "@/types/subjects";
-import type { Guide, GuideReference, HydratedGuide } from "@/types/guides";
-import type { HydratedPath, Path } from "@/types/paths";
+import type {
+  Guide,
+  GuideReference,
+  HydratedGuide,
+  HydratedReviewGuide,
+} from "@/types/guides";
+import type { HydratedObjective, Objective } from "@/types/objectives";
 
 // TODO: update to fetch from api
-export const getPathBySlug = (paths: Array<Path>, slug: string) => {
+export const getPathBySlug = (paths: Array<Objective>, slug: string) => {
   const foundPath = paths.find((path) => path.slug === slug);
   return foundPath;
 };
@@ -39,13 +44,13 @@ export const createSubjectMap = (
 };
 
 // TODO: when integrating api, hydration should be done on the backend - change this to fetch from api
-export const hydratePaths = (
+export const hydrateObjectives = (
   guides: Array<Guide>,
-  paths: Array<Path>
-): Array<HydratedPath> => {
+  paths: Array<Objective>
+): Array<HydratedObjective> => {
   const guideMap = createGuideMap(guides);
 
-  const hydratedPaths = paths.map((path) => ({
+  const hydratedObjectives = paths.map((path) => ({
     ...path,
     levels: path.levels.map((l) => ({
       level: l.level,
@@ -53,7 +58,7 @@ export const hydratePaths = (
     })),
   }));
 
-  return hydratedPaths;
+  return hydratedObjectives;
 };
 
 export const hydrateGuide = (
@@ -66,6 +71,34 @@ export const hydrateGuide = (
 
   return {
     ...guide,
+
+    tags: guide.tags
+      .map((slug) => subjectMap[slug])
+      .map<SubjectReference>((subject) => ({
+        slug: subjectMap[subject.slug].slug,
+        name: subjectMap[subject.slug].name,
+      })),
+
+    prerequisites: guide.prerequisites
+      .map((slug) => guideMap[slug])
+      .map<GuideReference>((prereq) => ({
+        slug: prereq.slug,
+        title: prereq.title,
+      })),
+  };
+};
+
+export const hydrateReviewGuide = (
+  guide: Guide,
+  guides: Array<Guide>,
+  subjects: Array<Subject>
+): HydratedReviewGuide => {
+  const guideMap = createGuideMap(guides);
+  const subjectMap = createSubjectMap(subjects);
+
+  return {
+    ...guide,
+    type: "practical",
 
     tags: guide.tags
       .map((slug) => subjectMap[slug])

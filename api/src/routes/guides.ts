@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { requireUser } from "../middleware/auth.middleware";
+import { rateLimitMiddleware } from "../middleware/rate-limit.middleware";
 import type { HonoEnv } from "../types";
 import { zValidator } from "@hono/zod-validator";
 import {
@@ -27,8 +28,9 @@ import {
   listVariantRevisions,
   retractVote,
   rollbackVariant,
-} from "../services/guide-variant.service";
+} from "../services/variant.service";
 import {
+  diffRevisions,
   getRevision,
   submitRevision,
   updateRevision,
@@ -52,14 +54,21 @@ export const guidesRouter = new Hono<HonoEnv>()
     return c.json({ guides });
   })
 
-  // 201 with { revision_id } for the editor route.
-  .post("/", requireUser, zValidator("json", createGuideBody), async (c) => {
-    const { revision_id } = await createGuide(
-      c.get("supabase"),
-      c.req.valid("json")
-    );
-    return c.json({ revision_id }, 201);
-  })
+  // 201 with { revision_id } for the editor route. Rate-limited to 15
+  // guide creations per 24h per user to prevent spam.
+  .post(
+    "/",
+    requireUser,
+    rateLimitMiddleware({ windowSeconds: 86_400, max: 15 }),
+    zValidator("json", createGuideBody),
+    async (c) => {
+      const { revision_id } = await createGuide(
+        c.get("supabase"),
+        c.req.valid("json")
+      );
+      return c.json({ revision_id }, 201);
+    }
+  )
 
   // Returns the guide content and its subject tags.
   .get("/:slug", async (c) => {
@@ -190,27 +199,27 @@ export const variantsRouter = new Hono<HonoEnv>()
   );
 
 export const guideRevisionsRouter = new Hono<HonoEnv>()
-  // Returns one revision snapshot as { revision }.
+  // Returns one revision snapshot and its subject tags as { revision, subjects }.
   .get("/:id", async (c) => {
-    const { revision } = await getRevision(
+    const { revision, subjects } = await getRevision(
       c.get("supabase"),
       c.req.param("id")
     );
-    return c.json({ revision });
+    return c.json({ revision, subjects });
   })
 
-  // Overwrites a draft revision in place; returns { revision }. 404 once submitted.
+  // Overwrites a draft revision in place; returns { revision, subjects }. 404 once submitted.
   .patch(
     "/:id",
     requireUser,
     zValidator("json", updateRevisionSchema),
     async (c) => {
-      const { revision } = await updateRevision(
+      const { revision, subjects } = await updateRevision(
         c.get("supabase"),
         c.req.param("id"),
         c.req.valid("json")
       );
-      return c.json({ revision });
+      return c.json({ revision, subjects });
     }
   )
 
@@ -223,5 +232,12 @@ export const guideRevisionsRouter = new Hono<HonoEnv>()
     return c.json({ review_case_id }, 201);
   })
 
-  // Returns the diff between two revisions.
-  .get("/:id/diff/:otherId", (c) => c.json({ error: "Not implemented" }, 501));
+  // Returns the diff between two revisions as { from, to, fields }.
+  .get("/:id/diff/:otherId", async (c) => {
+    const { from, to, fields } = await diffRevisions(
+      c.get("supabase"),
+      c.req.param("id"),
+      c.req.param("otherId")
+    );
+    return c.json({ from, to, fields });
+  });

@@ -1,14 +1,16 @@
-import type { HydratedPath } from "@/types/paths";
+import type { HydratedObjective } from "@/types/objectives";
 
 import { Separator } from "@/components/ui/separator";
-import { PathCard } from "@/components/cards/PathCard";
+import { ObjectiveCard } from "@/components/cards/ObjectiveCard";
+
+import { Route as ObjectiveRoute } from "@/routes/objectives.$slug";
 
 type PropTypes = {
-  paths: Array<HydratedPath>;
+  objectives: Array<HydratedObjective>;
   type: string;
 };
 
-export const FeaturedRow = ({ paths, type }: PropTypes) => {
+export const FeaturedRow = ({ objectives, type }: PropTypes) => {
   return (
     <section className="border-b px-8 py-10 lg:px-16">
       {/* Header */}
@@ -22,13 +24,29 @@ export const FeaturedRow = ({ paths, type }: PropTypes) => {
 
       <Separator className="mb-4 bg-border" />
 
-      {/* Paths */}
+      {/* Objectives */}
       <div className="flex scrollbar-thin gap-6 overflow-x-auto p-2">
-        {paths.map((path: HydratedPath) => (
-          <div key={path.slug} className="w-[550px] shrink-0">
-            <PathCard key={path.slug} path={path} />
-          </div>
-        ))}
+        {objectives.map((objective: HydratedObjective) => {
+          const o = {
+            ...objective,
+            stats: [
+              { label: "Duration", data: objective.duration },
+              { label: "Guides", data: objective.levels.length },
+            ],
+          };
+          return (
+            <div
+              key={objective.slug}
+              className="w-[calc(100vw_-_8rem)] shrink-0 sm:w-[550px]"
+            >
+              <ObjectiveCard
+                key={o.slug}
+                objective={o}
+                to={ObjectiveRoute.to}
+              />
+            </div>
+          );
+        })}
       </div>
     </section>
   );

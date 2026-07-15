@@ -1,5 +1,6 @@
 type: object
-description: A revision summary for history lists (guide, variant, or path).
+additionalProperties: false
+description: A revision summary for history lists (guide, variant, or objective).
 properties:
   id:
     $ref: "./Uuid.yaml"
