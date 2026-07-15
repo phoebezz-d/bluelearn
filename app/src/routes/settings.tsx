@@ -94,14 +94,14 @@ function RouteComponent() {
               </button>
 
               {appearanceOpen && (
-                <div className="ml-2 space-y-2 rounded-md border border-border bg-background p-2">
+                <div className="ml-2 space-y-2 rounded-md bg-input/30 p-4">
                   <button
                     onClick={() => setAppearance("light")}
                     className={cn(
                       "w-full rounded px-3 py-2 text-left text-sm text-foreground transition-colors",
                       appearance === "light"
-                        ? "bg-muted text-foreground"
-                        : "bg-input/30 hover:bg-muted/50"
+                        ? "border-b-2 border-foreground bg-transparent"
+                        : "bg-transparent hover:bg-muted/20"
                     )}
                   >
                     Light
@@ -111,8 +111,8 @@ function RouteComponent() {
                     className={cn(
                       "w-full rounded px-3 py-2 text-left text-sm font-medium text-foreground transition-colors",
                       appearance === "dark"
-                        ? "bg-muted text-foreground"
-                        : "bg-input/30 hover:bg-muted/50"
+                        ? "border-b-2 border-foreground bg-transparent"
+                        : "bg-transparent hover:bg-muted/20"
                     )}
                   >
                     Dark
