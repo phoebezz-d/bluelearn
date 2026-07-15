@@ -186,15 +186,13 @@ function RouteComponent() {
 
                 <Button
                   onClick={handleSave}
-                  className="bg-muted text-foreground hover:bg-muted/90"
+                  className="border border-border bg-muted text-foreground hover:bg-muted/90"
                 >
                   Save
                 </Button>
               </div>
             </div>
           )}
-
-          {/* Notifications Section */}
           {activeSection === "notifications" && (
             <div className="space-y-8">
               <div>
@@ -248,7 +246,7 @@ function RouteComponent() {
 
                 <Button
                   onClick={handleSave}
-                  className="bg-muted text-foreground hover:bg-muted/90"
+                  className="border border-border bg-muted text-foreground hover:bg-muted/90"
                 >
                   Save
                 </Button>
