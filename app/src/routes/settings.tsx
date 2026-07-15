@@ -246,7 +246,7 @@ function RouteComponent() {
 
                 <Button
                   onClick={handleSave}
-                  className="border border-border bg-muted text-foreground hover:bg-muted/90"
+                  className="bg-input text-foreground hover:bg-input/90"
                 >
                   Save
                 </Button>
