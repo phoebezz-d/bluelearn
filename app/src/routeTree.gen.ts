@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubjectsRouteImport } from './routes/subjects'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ObjectivesRouteImport } from './routes/objectives'
@@ -29,6 +30,11 @@ import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 const SubjectsRoute = SubjectsRouteImport.update({
   id: '/subjects',
   path: '/subjects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReviewRoute = ReviewRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/objectives': typeof ObjectivesRouteWithChildren
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/guides/$slug': typeof GuidesSlugRoute
   '/objectives/$slug': typeof ObjectivesSlugRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/guides': typeof GuidesRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/settings': typeof SettingsRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/objectives/$slug': typeof ObjectivesSlugRoute
   '/review/$slug': typeof ReviewSlugRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/objectives': typeof ObjectivesRouteWithChildren
   '/register': typeof RegisterRoute
   '/review': typeof ReviewRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/subjects': typeof SubjectsRouteWithChildren
   '/guides/$slug': typeof GuidesSlugRoute
   '/objectives/$slug': typeof ObjectivesSlugRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/objectives'
     | '/register'
     | '/review'
+    | '/settings'
     | '/subjects'
     | '/guides/$slug'
     | '/objectives/$slug'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/guides'
     | '/login'
     | '/register'
+    | '/settings'
     | '/guides/$slug'
     | '/objectives/$slug'
     | '/review/$slug'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/objectives'
     | '/register'
     | '/review'
+    | '/settings'
     | '/subjects'
     | '/guides/$slug'
     | '/objectives/$slug'
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   ObjectivesRoute: typeof ObjectivesRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   ReviewRoute: typeof ReviewRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
 }
 
@@ -232,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/subjects'
       fullPath: '/subjects'
       preLoaderRoute: typeof SubjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/review': {
@@ -403,6 +423,7 @@ const rootRouteChildren: RootRouteChildren = {
   ObjectivesRoute: ObjectivesRouteWithChildren,
   RegisterRoute: RegisterRoute,
   ReviewRoute: ReviewRouteWithChildren,
+  SettingsRoute: SettingsRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
