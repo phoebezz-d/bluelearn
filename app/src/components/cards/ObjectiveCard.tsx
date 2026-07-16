@@ -13,10 +13,6 @@ type FeaturedNode = {
   title: string | null;
 };
 
-// Only the fields the card renders. Callers pass a superset (a full static
-// HydratedObjective, or an API list item mapped to these keys). The graph reads
-// featuredSubObjective when present and otherwise falls back to the legacy
-// levels shape that routes still on static data supply.
 type ObjectiveProp = {
   slug: string;
   title: string | null;
@@ -35,8 +31,8 @@ type PropTypes = {
   to: ToPathOption<RegisteredRouter>;
 };
 
-// The featured sub-objective's guides, as the curator placed them. Only the
-// last three are drawn; the rest collapse into a leading "N more guides" marker.
+// Only the last three guides are drawn. The rest collapse into a leading
+// "N more guides" marker.
 function FeaturedSubObjective({ nodes }: { nodes: Array<FeaturedNode> }) {
   const shown = nodes.slice(-3);
   const hidden = nodes.length - shown.length;
