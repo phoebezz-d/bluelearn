@@ -35,18 +35,6 @@ type PropTypes = {
   to: ToPathOption<RegisteredRouter>;
 };
 
-const graphRow =
-  "flex flex-col items-center justify-center gap-3 sm:flex-row sm:items-start sm:gap-2";
-const graphCell =
-  "flex w-full flex-col items-center gap-2 text-center sm:w-24 md:w-28";
-const nodeBadge =
-  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-badge text-base font-medium";
-const collapseMarker =
-  "flex h-8 shrink-0 items-center justify-center text-base font-medium";
-const stepTitle = "line-clamp-3 text-sm leading-snug text-muted-foreground";
-const arrow =
-  "mt-1.5 h-4 w-4 shrink-0 rotate-90 text-muted-foreground sm:rotate-0";
-
 // The featured sub-objective's guides, as the curator placed them. Only the
 // last three are drawn; the rest collapse into a leading "N more guides" marker.
 function FeaturedSubObjective({ nodes }: { nodes: Array<FeaturedNode> }) {
@@ -55,23 +43,33 @@ function FeaturedSubObjective({ nodes }: { nodes: Array<FeaturedNode> }) {
 
   return (
     <CardContent className="border-t p-4">
-      <div className={graphRow}>
+      <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:items-start sm:gap-2">
         {hidden > 0 && (
           <>
-            <div className={graphCell}>
-              <span className={collapseMarker}>{hidden}</span>
-              <span className={stepTitle}>more guides</span>
+            <div className="flex w-full flex-col items-center gap-2 text-center sm:w-24 md:w-28">
+              <span className="flex h-8 shrink-0 items-center justify-center text-base font-medium">
+                {hidden}
+              </span>
+              <span className="line-clamp-3 text-sm leading-snug text-muted-foreground">
+                more guides
+              </span>
             </div>
-            <ArrowRight className={arrow} />
+            <ArrowRight className="mt-1.5 h-4 w-4 shrink-0 rotate-90 text-muted-foreground sm:rotate-0" />
           </>
         )}
         {shown.map((step, index) => (
           <Fragment key={step.position}>
-            <div className={graphCell}>
-              <span className={nodeBadge}>{step.position}</span>
-              <span className={stepTitle}>{step.title}</span>
+            <div className="flex w-full flex-col items-center gap-2 text-center sm:w-24 md:w-28">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-badge text-base font-medium">
+                {step.position}
+              </span>
+              <span className="line-clamp-3 text-sm leading-snug text-muted-foreground">
+                {step.title}
+              </span>
             </div>
-            {index < shown.length - 1 && <ArrowRight className={arrow} />}
+            {index < shown.length - 1 && (
+              <ArrowRight className="mt-1.5 h-4 w-4 shrink-0 rotate-90 text-muted-foreground sm:rotate-0" />
+            )}
           </Fragment>
         ))}
       </div>
@@ -90,22 +88,30 @@ function LevelsGraph({
 
   return (
     <CardContent className="border-t p-4">
-      <div className={graphRow}>
+      <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:items-start sm:gap-2">
         {previewLevels.map((level, index) => (
           <Fragment key={index}>
-            <div className={graphCell}>
-              <span className={nodeBadge}>{level.level}</span>
-              <span className={stepTitle}>{level.guide.title}</span>
+            <div className="flex w-full flex-col items-center gap-2 text-center sm:w-24 md:w-28">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-badge text-base font-medium">
+                {level.level}
+              </span>
+              <span className="line-clamp-3 text-sm leading-snug text-muted-foreground">
+                {level.guide.title}
+              </span>
             </div>
             {(index < previewLevels.length - 1 || remaining > 0) && (
-              <ArrowRight className={arrow} />
+              <ArrowRight className="mt-1.5 h-4 w-4 shrink-0 rotate-90 text-muted-foreground sm:rotate-0" />
             )}
           </Fragment>
         ))}
         {remaining > 0 && (
-          <div className={graphCell}>
-            <span className={collapseMarker}>{remaining}</span>
-            <span className={stepTitle}>more levels</span>
+          <div className="flex w-full flex-col items-center gap-2 text-center sm:w-24 md:w-28">
+            <span className="flex h-8 shrink-0 items-center justify-center text-base font-medium">
+              {remaining}
+            </span>
+            <span className="line-clamp-3 text-sm leading-snug text-muted-foreground">
+              more levels
+            </span>
           </div>
         )}
       </div>
