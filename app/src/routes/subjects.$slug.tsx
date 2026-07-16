@@ -39,23 +39,15 @@ function formatDate(iso: string | undefined) {
   });
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto max-w-[1280px] border-x bg-background">
-      {children}
-    </div>
-  );
-}
-
 function SubjectError() {
   return (
-    <Shell>
+    <div className="mx-auto max-w-[1280px] border-x bg-background">
       <section className="border-b px-8 py-8 lg:px-16">
         <p className="text-sm text-muted-foreground">
           This subject could not be loaded. Try again shortly.
         </p>
       </section>
-    </Shell>
+    </div>
   );
 }
 
@@ -64,7 +56,7 @@ function SubjectPage() {
   const { subject, objectives, guides } = Route.useLoaderData();
 
   return (
-    <Shell>
+    <div className="mx-auto max-w-[1280px] border-x bg-background">
       <section className="border-b px-8 py-8 lg:px-16">
         <div className="mb-6">
           <h1 className="data-label text-[14px] tracking-[0.08em] text-muted-foreground uppercase">
@@ -165,6 +157,6 @@ function SubjectPage() {
           </div>
         )}
       </section>
-    </Shell>
+    </div>
   );
 }
