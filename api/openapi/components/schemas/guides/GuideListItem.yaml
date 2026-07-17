@@ -33,11 +33,21 @@ properties:
     type: integer
     example: 15
   tags:
-    description: Slugs of every subject the guide is tagged with.
+    description: >
+      Every subject the guide is tagged with. slug links to the subject page,
+      name is the card label.
     type: array
     items:
-      type: string
-    example: [game-development, blender]
+      type: object
+      additionalProperties: false
+      properties:
+        slug:
+          type: string
+          example: game-development
+        name:
+          type: string
+          example: Game Development
+      required: [slug, name]
 required:
   [
     id,

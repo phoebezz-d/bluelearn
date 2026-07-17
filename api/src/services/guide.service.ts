@@ -3,6 +3,7 @@ import type {
   CreateGuideInput,
   CreateVariantInput,
   GuideListItem,
+  SubjectReference,
 } from "@bluelearn/schemas";
 import type { Database } from "../database.types";
 import { ServiceError } from "../lib/service-error";
@@ -90,15 +91,16 @@ async function resolveBaseId(supabase: DB, rawSlug: string) {
   return data.id;
 }
 
-// Subject slugs carried by each guide revision, keyed by revision id. Card
-// listings show the guide's full tag set regardless of how they filtered.
+// Subjects carried by each guide revision, keyed by revision id. Cards need the
+// slug to link and the name to label. Listings show the guide's full tag set
+// even when the list itself was filtered to one subject.
 async function loadGuideTags(supabase: DB, revisionIds: string[]) {
-  const map = new Map<string, string[]>();
+  const map = new Map<string, SubjectReference[]>();
   if (revisionIds.length === 0) return map;
 
   const { data, error } = await supabase
     .from("guide_revision_subjects")
-    .select("guide_revision_id, subject:subjects(slug)")
+    .select("guide_revision_id, subject:subjects(slug, name)")
     .in("guide_revision_id", revisionIds);
 
   if (error) {
@@ -106,13 +108,14 @@ async function loadGuideTags(supabase: DB, revisionIds: string[]) {
     throw new ServiceError("Failed to load guide tags", 500);
   }
   for (const row of data ?? []) {
-    const slug = row.subject?.slug;
-    if (!slug) continue;
+    const subject = row.subject;
+    if (!subject) continue;
     const list = map.get(row.guide_revision_id) ?? [];
-    list.push(slug);
+    list.push({ slug: subject.slug, name: subject.name });
     map.set(row.guide_revision_id, list);
   }
-  for (const list of map.values()) list.sort();
+  for (const list of map.values())
+    list.sort((a, b) => a.name.localeCompare(b.name));
   return map;
 }
 

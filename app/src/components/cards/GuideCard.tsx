@@ -16,7 +16,7 @@ type GuideProp = {
   summary?: string | null;
   created_at?: string;
   status?: string;
-  tags?: Array<string>;
+  tags?: Array<string | { slug: string; name: string }>;
   stats?: Array<{ label: string; data: string | number }>;
   actionBtns?: React.ReactNode;
 };
@@ -71,15 +71,19 @@ export const GuideCard = ({ guide, origin, to }: PropTypes) => {
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 pt-4">
-            {(guide.tags ?? []).map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
-              >
-                {tag}
-              </Badge>
-            ))}
+            {(guide.tags ?? []).map((tag) => {
+              const slug = typeof tag === "string" ? tag : tag.slug;
+              const name = typeof tag === "string" ? tag : tag.name;
+              return (
+                <Badge
+                  key={slug}
+                  variant="outline"
+                  className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
+                >
+                  {name}
+                </Badge>
+              );
+            })}
           </div>
         </CardContent>
 
