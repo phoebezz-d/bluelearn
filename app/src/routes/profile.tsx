@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 import { fetchMyProfile } from "@/lib/profile";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/profile")({
   component: RouteComponent,
@@ -58,8 +59,8 @@ function ProfilePage({
     () => [
       { label: "Upvote", value: stats.upvotes ?? "—" },
       { label: "Downvote", value: stats.downvotes ?? "—" },
-      { label: "Reviews", value: stats.reviews ?? "—" },
       { label: "Contributions", value: stats.contributions ?? "—" },
+      { label: "Reviews", value: stats.reviews ?? "—" },
     ],
     [stats]
   );
@@ -100,14 +101,22 @@ function ProfilePage({
           <Table className="mx-auto w-full max-w-5xl">
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4 py-3 text-base">Type</TableHead>
-                <TableHead className="px-4 py-3 text-base">Title</TableHead>
-                <TableHead className="px-4 py-3 text-base">
+                <TableHead className="px-4 py-3 font-mono text-[14px] tracking-[0.08em] uppercase">
+                  Type
+                </TableHead>
+                <TableHead className="px-4 py-3 font-mono text-[14px] tracking-[0.08em] uppercase">
+                  Title
+                </TableHead>
+                <TableHead className="px-4 py-3 font-mono text-[14px] tracking-[0.08em] uppercase">
                   Change Summary
                 </TableHead>
-                <TableHead className="px-4 py-3 text-base">Date</TableHead>
-                <TableHead className="px-4 py-3 text-base">Status</TableHead>
-                <TableHead className="px-4 py-3 text-base">
+                <TableHead className="px-4 py-3 font-mono text-[14px] tracking-[0.08em] uppercase">
+                  Date
+                </TableHead>
+                <TableHead className="px-4 py-3 font-mono text-[14px] tracking-[0.08em] uppercase">
+                  Status
+                </TableHead>
+                <TableHead className="px-4 py-3 font-mono text-[14px] tracking-[0.08em] uppercase">
                   Review Case
                 </TableHead>
               </TableRow>
@@ -124,16 +133,38 @@ function ProfilePage({
                 </TableRow>
               ) : (
                 activityRows.map((data, index) => (
-                  <TableRow key={`${data.type}-${index}`}>
+                  <TableRow
+                    key={`${data.type}-${index}`}
+                    className="cursor-pointer"
+                    onClick={() => {}} // TODO: opens to draft/published guide/variant/objective
+                  >
                     <TableCell className="px-4 py-3">{data.type}</TableCell>
+
                     <TableCell className="px-4 py-3">{data.title}</TableCell>
+
                     <TableCell className="px-4 py-3">
                       {data.change_summary}
                     </TableCell>
-                    <TableCell className="px-4 py-3">{data.date}</TableCell>
-                    <TableCell className="px-4 py-3">{data.status}</TableCell>
+
+                    <TableCell className="mono-micro px-4 py-3">
+                      {data.date}
+                    </TableCell>
+
                     <TableCell className="px-4 py-3">
-                      <Button className="bg-gray-400 text-black uppercase">
+                      <Badge
+                        variant="outline"
+                        className="mono-micro rounded-full border border-badge-border bg-badge tracking-[0.08em] text-badge-foreground"
+                      >
+                        {data.status}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="px-4 py-3">
+                      <Button
+                        className="btn-pri"
+                        size="lg"
+                        onClick={() => {}} // TODO: opens review page - guide/variant/objective - with review notes
+                      >
                         {data.review_case}
                       </Button>
                     </TableCell>
