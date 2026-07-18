@@ -1013,6 +1013,15 @@ export type Database = {
           to_guide_base_id: string
         }[]
       }
+      promote_canonical_guide: {
+        Args: {
+          p_guide_base_id: string
+          p_margin?: number
+          p_min_votes?: number
+          p_z?: number
+        }
+        Returns: string
+      }
       publish_objective_revision: {
         Args: { p_revision_id: string }
         Returns: string
