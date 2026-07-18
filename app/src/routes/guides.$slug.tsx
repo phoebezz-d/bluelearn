@@ -164,13 +164,13 @@ function RouteComponent() {
                       {idx === 0 ? (
                         <House className="h-3.5 w-3.5 shrink-0" />
                       ) : (
-                        <span className="max-w-[20ch] truncate">
+                        <span className="max-w-[30ch] truncate">
                           {crumb.label}
                         </span>
                       )}
                     </Link>
                   ) : (
-                    <span className="max-w-[20ch] truncate">{crumb.label}</span>
+                    <span className="max-w-[30ch] truncate">{crumb.label}</span>
                   )}
                   {idx < breadcrumbs.length - 1 && (
                     <span className="shrink-0">/</span>
