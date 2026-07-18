@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -160,6 +140,36 @@ export type Database = {
           },
         ]
       }
+      guide_revision_subjects: {
+        Row: {
+          guide_revision_id: string
+          subject_id: string
+        }
+        Insert: {
+          guide_revision_id: string
+          subject_id: string
+        }
+        Update: {
+          guide_revision_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_revision_subjects_guide_revision_id_fkey"
+            columns: ["guide_revision_id"]
+            isOneToOne: false
+            referencedRelation: "guide_revisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guide_revision_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guide_revisions: {
         Row: {
           approved_at: string | null
@@ -174,6 +184,7 @@ export type Database = {
           summary: string | null
           title: string | null
           updated_at: string
+          word_count: number
         }
         Insert: {
           approved_at?: string | null
@@ -188,6 +199,7 @@ export type Database = {
           summary?: string | null
           title?: string | null
           updated_at?: string
+          word_count?: number
         }
         Update: {
           approved_at?: string | null
@@ -202,6 +214,7 @@ export type Database = {
           summary?: string | null
           title?: string | null
           updated_at?: string
+          word_count?: number
         }
         Relationships: [
           {
@@ -216,36 +229,6 @@ export type Database = {
             columns: ["guide_id"]
             isOneToOne: false
             referencedRelation: "guides"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      guide_subjects: {
-        Row: {
-          guide_base_id: string
-          subject_id: string
-        }
-        Insert: {
-          guide_base_id: string
-          subject_id: string
-        }
-        Update: {
-          guide_base_id?: string
-          subject_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "guide_subjects_guide_base_id_fkey"
-            columns: ["guide_base_id"]
-            isOneToOne: false
-            referencedRelation: "guide_bases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "guide_subjects_subject_id_fkey"
-            columns: ["subject_id"]
-            isOneToOne: false
-            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]
@@ -352,14 +335,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "learning_path_revision_edges_from_is_node"
+            foreignKeyName: "objective_revision_edges_from_is_node"
             columns: ["revision_id", "from_guide_base_id"]
             isOneToOne: false
             referencedRelation: "objective_revision_nodes"
             referencedColumns: ["revision_id", "guide_base_id"]
           },
           {
-            foreignKeyName: "learning_path_revision_edges_to_is_node"
+            foreignKeyName: "objective_revision_edges_to_is_node"
             columns: ["revision_id", "to_guide_base_id"]
             isOneToOne: false
             referencedRelation: "objective_revision_nodes"
@@ -367,10 +350,55 @@ export type Database = {
           },
         ]
       }
+      objective_revision_node_orders: {
+        Row: {
+          node_id: string
+          position: number
+          revision_id: string
+          target_node_id: string
+        }
+        Insert: {
+          node_id: string
+          position: number
+          revision_id: string
+          target_node_id: string
+        }
+        Update: {
+          node_id?: string
+          position?: number
+          revision_id?: string
+          target_node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objective_revision_node_orders_node_is_node"
+            columns: ["node_id", "revision_id"]
+            isOneToOne: false
+            referencedRelation: "objective_revision_nodes"
+            referencedColumns: ["id", "revision_id"]
+          },
+          {
+            foreignKeyName: "objective_revision_node_orders_revision_id_fkey"
+            columns: ["revision_id"]
+            isOneToOne: false
+            referencedRelation: "objective_revisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objective_revision_node_orders_target_is_node"
+            columns: ["target_node_id", "revision_id"]
+            isOneToOne: false
+            referencedRelation: "objective_revision_nodes"
+            referencedColumns: ["id", "revision_id"]
+          },
+        ]
+      }
       objective_revision_nodes: {
         Row: {
           guide_base_id: string
           guide_id: string
+          id: string
+          is_featured: boolean
           is_included: boolean
           is_target: boolean
           note: string | null
@@ -379,6 +407,8 @@ export type Database = {
         Insert: {
           guide_base_id: string
           guide_id: string
+          id?: string
+          is_featured?: boolean
           is_included?: boolean
           is_target?: boolean
           note?: string | null
@@ -387,6 +417,8 @@ export type Database = {
         Update: {
           guide_base_id?: string
           guide_id?: string
+          id?: string
+          is_featured?: boolean
           is_included?: boolean
           is_target?: boolean
           note?: string | null
@@ -406,6 +438,36 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "guides"
             referencedColumns: ["id", "guide_base_id"]
+          },
+        ]
+      }
+      objective_revision_subjects: {
+        Row: {
+          objective_revision_id: string
+          subject_id: string
+        }
+        Insert: {
+          objective_revision_id: string
+          subject_id: string
+        }
+        Update: {
+          objective_revision_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objective_revision_subjects_objective_revision_id_fkey"
+            columns: ["objective_revision_id"]
+            isOneToOne: false
+            referencedRelation: "objective_revisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objective_revision_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -459,36 +521,6 @@ export type Database = {
             columns: ["objective_id"]
             isOneToOne: false
             referencedRelation: "objectives"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      objective_subjects: {
-        Row: {
-          objective_id: string
-          subject_id: string
-        }
-        Insert: {
-          objective_id: string
-          subject_id: string
-        }
-        Update: {
-          objective_id?: string
-          subject_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "objective_subjects_objective_id_fkey"
-            columns: ["objective_id"]
-            isOneToOne: false
-            referencedRelation: "objectives"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "objective_subjects_subject_id_fkey"
-            columns: ["subject_id"]
-            isOneToOne: false
-            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]
@@ -981,6 +1013,15 @@ export type Database = {
           to_guide_base_id: string
         }[]
       }
+      promote_canonical_guide: {
+        Args: {
+          p_guide_base_id: string
+          p_margin?: number
+          p_min_votes?: number
+          p_z?: number
+        }
+        Returns: string
+      }
       publish_objective_revision: {
         Args: { p_revision_id: string }
         Returns: string
@@ -1015,7 +1056,7 @@ export type Database = {
         | "wrong_level"
         | "scope_creep"
       edge_type: "prerequisite" | "related"
-      knowledge_type: "theory" | "practice"
+      knowledge_type: "theoretical" | "practical"
       node_status: "draft" | "published" | "archived"
       objective_revision_status: "draft" | "published"
       review_outcome: "approved" | "rejected"
@@ -1148,9 +1189,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       app_role: ["verifier", "moderator", "curator", "admin"],
@@ -1175,7 +1213,7 @@ export const Constants = {
         "scope_creep",
       ],
       edge_type: ["prerequisite", "related"],
-      knowledge_type: ["theory", "practice"],
+      knowledge_type: ["theoretical", "practical"],
       node_status: ["draft", "published", "archived"],
       objective_revision_status: ["draft", "published"],
       review_outcome: ["approved", "rejected"],
@@ -1186,4 +1224,3 @@ export const Constants = {
     },
   },
 } as const
-

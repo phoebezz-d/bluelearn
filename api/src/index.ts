@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseMiddleware } from "./middleware/auth.middleware";
 import { ServiceError } from "./lib/service-error";
 import { assemblePendingPanels } from "./services/review.service";
+import { promoteAllCanonicals } from "./services/promotion.service";
 import type { Database } from "./database.types";
 import type { Bindings, HonoEnv } from "./types";
 import { meRouter, profilesRouter } from "./routes/identity";
@@ -56,9 +57,12 @@ async function scheduled(_event: ScheduledController, env: Bindings) {
     { auth: { persistSession: false, autoRefreshToken: false } }
   );
   await assemblePendingPanels(supabase);
+  await promoteAllCanonicals(supabase);
 }
 
 // Default export doubles as the Workers handler and the cron entry: Hono serves
 // fetch and scheduled runs assembly. Tests import it to call app.request().
 export default Object.assign(app, { scheduled });
 export type AppType = typeof app;
+
+export { RateLimiterDurableObject } from "./durable-objects/rate-limiter.do";
