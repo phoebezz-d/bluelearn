@@ -2,7 +2,7 @@ import { CardFooter } from "@/components/ui/card";
 import { FooterStats } from "@/components/cards/FooterStats";
 
 type Data = {
-  stats?: Array<{ label: string; data: number }>;
+  stats?: Array<{ label: string; data: string | number }>;
   actionBtns?: React.ReactNode;
 };
 
@@ -12,8 +12,8 @@ type PropTypes = {
 
 export const Footer = ({ data }: PropTypes) => {
   return (
-    <CardFooter className="grid grid-cols-2 border-t p-0 lg:grid-cols-4">
-      {data.stats?.map((g: { label: string; data: number }) => {
+    <CardFooter className="grid grid-cols-2 border-t p-0 sm:grid-cols-4 [&>*:last-child]:border-r-0">
+      {data.stats?.map((g: { label: string; data: string | number }) => {
         return <FooterStats key={g.label} label={g.label} data={g.data} />;
       })}
       {data.actionBtns}
